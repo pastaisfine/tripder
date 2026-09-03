@@ -5,7 +5,7 @@ export default function DoneScreen({ useAppState }) {
   const { likes, skips, reasonCount } = useAppState;
 
   return (
-    <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+    <section className="screen active">
         <div className="done-wrap">
           <div className="bigcount">Done · Alice</div>
           <h1 className="splash-title small" style={{ marginTop: 0 }}>

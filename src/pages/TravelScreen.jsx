@@ -33,7 +33,7 @@ export default function TravelScreen({ useAppState }) {
 
   return (
 
-      <section className="screen active screen-travel" style={{ paddingTop: "var(--sb)" }}>
+      <section className="screen active screen-travel">
         <div className="travel-head">
           <h1 className="h-display" style={{ fontSize: 27 }}>Trip basics</h1>
           <div className="eyebrow" style={{ marginTop: 4 }}>As the leader, pick the stay &amp; the flight.</div>

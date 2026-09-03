@@ -24,7 +24,7 @@ export default function StyleScreen({ useAppState }) {
 
   return (
 
-      <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+      <section className="screen active">
         <div className="done-wrap">
           <div className="bigcount">Style · Alice</div>
           <StyleCard style={style} />

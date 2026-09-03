@@ -61,7 +61,10 @@ export default function SwipeCard({ card, onVerdict, onDetail, stacked }) {
 }
 
 const chipInline = {
-  background: "rgba(29,44,26,.5)",
-  borderColor: "transparent",
+  background: "rgba(255,255,255,.22)",
+  borderColor: "rgba(255,255,255,.34)",
   color: "#fff",
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
+  fontWeight: 600,
 };

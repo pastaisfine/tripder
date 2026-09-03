@@ -38,55 +38,57 @@ export default function PlanScreen({ useAppState }) {
 
   return (
 
-      <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+      <section className="screen active">
         <div className="plan-head">
           <div className="eyebrow">Saturday · Apr 25</div>
           <div className="day">The shared plan</div>
         </div>
 
-        <div className="sat bento-card" style={{ margin: "16px 20px 4px", maxWidth: "none", width: "auto", flex: "none" }}>
-          <SatisfactionRing value={sat} />
-          <div className="info">
-            <h3>Group satisfaction</h3>
-            <p>Weighted across 4 profiles · driven by your tagged reasons.</p>
-            <div className="satcats">
-              <span className="chip tag-ok">Food · high</span>
-              <span className="chip">Culture · medium</span>
-              <span className="chip tag-off">Nightlife · low</span>
+        <div className="plan-cards">
+          <div className="sat bento-card">
+            <SatisfactionRing value={sat} />
+            <div className="info">
+              <h3>Group satisfaction</h3>
+              <p>Weighted across 4 profiles · driven by your tagged reasons.</p>
+              <div className="satcats">
+                <span className="chip tag-ok">Food · high</span>
+                <span className="chip">Culture · medium</span>
+                <span className="chip tag-off">Nightlife · low</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="bento-card" style={{ margin: "12px 20px 0", maxWidth: "none", width: "auto", flex: "none", padding: "var(--card-pad)" }}>
-          <div className="bx-title">Trip basics · you're the leader</div>
-          <div className="tl-picks">
-            <div className="tl-pick">
-              <span className="lbl">Stay</span>
-              <span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span>
+          <div className="bento-card">
+            <div className="bx-title">Trip basics · you're the leader</div>
+            <div className="tl-picks">
+              <div className="tl-pick">
+                <span className="lbl">Stay</span>
+                <span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span>
+              </div>
+              <div className="tl-pick">
+                <span className="lbl">Flight</span>
+                <span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span>
+              </div>
             </div>
-            <div className="tl-pick">
-              <span className="lbl">Flight</span>
-              <span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span>
+            <button className="btn btn-primary btn-block" onClick={() => navigate("/travel")}>
+              Set stay &amp; flights →
+            </button>
+          </div>
+
+          <div className="whatif bento-card">
+            <div className="bx-title">What if we tried…</div>
+            <div className="seg">
+              {MODES.map((m) => (
+                <button key={m} className={mode === m ? "sel" : ""} onClick={() => setMode(m)}>
+                  {MODE_LABELS[m]}
+                </button>
+              ))}
             </div>
           </div>
-          <button className="btn btn-primary btn-block" style={{ marginTop: 12 }} onClick={() => navigate("/travel")}>
-            Set stay &amp; flights →
-          </button>
-        </div>
 
-        <div className="whatif bento-card" style={{ maxWidth: "none", width: "auto", flex: "none", margin: "12px 20px 0", padding: "var(--card-pad)" }}>
-          <div className="bx-title" style={{ fontSize: 15, marginBottom: 10 }}>What if we tried…</div>
-          <div className="seg">
-            {MODES.map((m) => (
-              <button key={m} className={mode === m ? "sel" : ""} onClick={() => setMode(m)}>
-                {MODE_LABELS[m]}
-              </button>
-            ))}
+          <div className={`delta ${plan.delta ? "show" : ""}`}>
+            <b>What changed:</b> <span dangerouslySetInnerHTML={{ __html: plan.delta }} />
           </div>
-        </div>
-
-        <div className={`delta ${plan.delta ? "show" : ""}`}>
-          <b>What changed:</b> <span dangerouslySetInnerHTML={{ __html: plan.delta }} />
         </div>
 
         <div className="timeline">
@@ -136,7 +138,7 @@ export default function PlanScreen({ useAppState }) {
         <div className="why-head">
           <h3>Group mood</h3>
         </div>
-        <div className="member-sat" style={{ padding: "6px 20px 30px" }}>
+        <div className="member-sat plan-tail" style={{ padding: "6px 20px 30px" }}>
           {ms.map((m) => (
             <div key={m.name} className="msrow">
               <div className="top">

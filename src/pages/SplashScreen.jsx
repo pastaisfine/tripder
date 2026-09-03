@@ -10,27 +10,20 @@ export default function SplashScreen() {
       <div className="splash-content">
         <div className="splash-in">
           <div className="splash-mark">
-            Where<b>Do</b>
+            Trip<b>der</b>
           </div>
           <div className="splash-mono">A group trip, actually decided</div>
         </div>
         <div className="splash-cta">
-          <h1 className="splash-title" style={{ color: "#fff" }}>
-            The group trip that everyone says yes to
-          </h1>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 12,
-              width: "100%",
-              maxWidth: 320,
-              margin: "0 auto",
-            }}
-          >
+          <div className="glass">
+            <h1 className="splash-title" style={{ color: "#fff", margin: "0 0 10px" }}>
+              The group trip that everyone says yes to
+            </h1>
+            <p className="splash-copy" style={{ color: "rgba(255,255,255,.9)", marginBottom: 18 }}>
+              Everyone swipes. Everyone says why. One itinerary nobody has to be talked into.
+            </p>
             <button
-              className="btn btn-primary btn-block"
+              className="btn btn-coral btn-block"
               onClick={() => navigate("/setup")}
             >
               Start a trip

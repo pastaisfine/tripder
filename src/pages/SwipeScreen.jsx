@@ -52,6 +52,7 @@ export default function SwipeScreen({ useAppState }) {
 
   const handleVerdict = (dir) => {
     const card = CARD_DATA[idx];
+    if (!card) return;
     swipeCard(dir);
     setReasonCard(card);
     setReasonDir(dir);
@@ -61,6 +62,10 @@ export default function SwipeScreen({ useAppState }) {
   };
 
   const saveAndClose = () => {
+    if (!reasonCard) {
+      dispatchSheets({ type: "close" });
+      return;
+    }
     const reasons = [...reasonSel];
     if (reasonFree.trim()) reasons.push(reasonFree.trim());
     saveReason(reasonCard.id, reasonDir, reasons);
@@ -73,7 +78,7 @@ export default function SwipeScreen({ useAppState }) {
   };
 
 return (
-      <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+      <section className="screen active">
         <div className="swipe-head">
           <div>
             <div className="eyebrow">Swipe for you</div>
@@ -87,7 +92,7 @@ return (
         </div>
 
         {idx >= total && !sheets.reason ? (
-          <div className="deck-zone" style={{ margin: "80px 20px 4px" }}>
+          <div className="deck-zone empty">
             <div className="deck sw-empty card">
               <div className="eyebrow">Deck cleared</div>
               <h2 className="h-display" style={{ fontSize: 23 }}>
@@ -123,17 +128,19 @@ return (
           </div>
         )}
 
-        <div className="sw-actions" hidden={idx >= total}>
-          <button className="sw-btn no" onClick={() => handleVerdict("no")} aria-label="Skip">
-            <XIcon />
-          </button>
-          <button className="sw-btn" onClick={() => openDetail()} aria-label="Details" style={{ width: 52, height: 52 }}>
-            <InfoIcon />
-          </button>
-          <button className="sw-btn yes" onClick={() => handleVerdict("yes")} aria-label="Like">
-            <HeartIcon />
-          </button>
-        </div>
+        {idx < total && (
+          <div className="sw-actions">
+            <button className="sw-btn no" onClick={() => handleVerdict("no")} aria-label="Skip">
+              <XIcon />
+            </button>
+            <button className="sw-btn" onClick={() => openDetail()} aria-label="Details" style={{ width: 52, height: 52 }}>
+              <InfoIcon />
+            </button>
+            <button className="sw-btn yes" onClick={() => handleVerdict("yes")} aria-label="Like">
+              <HeartIcon />
+            </button>
+          </div>
+        )}
 
         <BottomSheet
           open={sheets.reason}

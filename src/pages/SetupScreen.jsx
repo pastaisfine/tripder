@@ -55,7 +55,7 @@ export default function SetupScreen({ useAppState }) {
   };
 
   return (
-    <section className="screen active screen-setup" style={{ paddingTop: "var(--sb)" }}>
+    <section className="screen active screen-setup">
         <div className="setup-head">
           <div>
             <div className="eyebrow">New trip</div>

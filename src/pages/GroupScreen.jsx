@@ -57,7 +57,7 @@ export default function GroupScreen({ useAppState }) {
 
   return (
 
-      <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+      <section className="screen active">
         <div className="group-body">
           <div>
             <h1 className="h-display" style={{ fontSize: 27 }}>Group dynamics</h1>

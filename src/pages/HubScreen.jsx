@@ -10,7 +10,7 @@ export default function HubScreen({ useAppState }) {
   const doneCount = 3 + (mineDone ? 1 : 0);
 
   return (
-    <section className="screen active" style={{ paddingTop: "var(--sb)" }}>
+    <section className="screen active">
         <div className="hub-hero">
           <div className="scrim-top" />
           <img src="/images/lisbon-rooftops.jpg" alt="Lisbon" />
