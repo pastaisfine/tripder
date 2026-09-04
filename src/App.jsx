@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAppState } from "./state/useAppState";
 import AppHeader from "./components/AppHeader";
 import TabBar from "./components/TabBar";
+import { fmtDateRange } from "./utils/date";
 
 import SplashScreen from "./pages/SplashScreen";
 import HubScreen from "./pages/HubScreen";
@@ -27,7 +28,8 @@ const CHROME = {
 
 function Shell() {
   const appState = useAppState();
-  const trip = `${appState.dest || "Lisbon, Portugal"} · Apr 24–26`;
+  const dateRange = fmtDateRange(appState.startDate, appState.endDate);
+  const trip = `${appState.dest || "Lisbon, Portugal"}${dateRange ? ` · ${dateRange}` : ""}`;
 
   return (
     <div className="stage">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { PLAN } from "../data/plans";
 import { SATISFACTION } from "../data/styles";
@@ -7,6 +7,8 @@ import SatisfactionRing from "../components/SatisfactionRing";
 
 const MODES = ["balanced", "foodfirst", "slower"];
 const MODE_LABELS = { balanced: "Balanced", foodfirst: "Food-first", slower: "Slower pace" };
+const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 function tagClass(tag) {
   if (tag.includes("4/4")) return "tag-ok";
@@ -16,8 +18,18 @@ function tagClass(tag) {
 
 export default function PlanScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { mode, setMode, likes, skips, markPlanSeen, hotel, flight } = useAppState;
+  const { mode, setMode, likes, skips, markPlanSeen, hotel, flight, startDate, endDate } = useAppState;
   const [open, setOpen] = useState({});
+
+  const planDay = useMemo(() => {
+    if (startDate && endDate) {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const mid = new Date((s.getTime() + e.getTime()) / 2);
+      return mid;
+    }
+    return new Date(2025, 3, 25);
+  }, [startDate, endDate]);
 
   const hotelPicked = HOTELS.find((h) => h.id === hotel);
   const flightPicked = FLIGHTS.find((f) => f.id === flight);
@@ -40,7 +52,7 @@ export default function PlanScreen({ useAppState }) {
 
       <section className="screen active">
         <div className="plan-head">
-          <div className="eyebrow">Saturday · Apr 25</div>
+          <div className="eyebrow">{DAYS[planDay.getDay()]} · {MONTHS_SHORT[planDay.getMonth()]} {planDay.getDate()}</div>
           <div className="day">The shared plan</div>
         </div>
 

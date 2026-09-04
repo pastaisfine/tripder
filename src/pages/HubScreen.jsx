@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { MEMBERS } from "../data/members";
 import ProgressBar from "../components/ProgressBar";
+import { fmtDateRange, dayCount } from "../utils/date";
 
 export default function HubScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { likes, skips, reasonCount, styleSeen, styleName, dest } = useAppState;
+  const { likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate } = useAppState;
 
   const mineDone = likes + skips > 0;
   const doneCount = 3 + (mineDone ? 1 : 0);
+  const dateRange = fmtDateRange(startDate, endDate);
+  const days = startDate && endDate ? dayCount(startDate, endDate) : 3;
 
   return (
     <section className="screen active">
@@ -16,8 +19,8 @@ export default function HubScreen({ useAppState }) {
           <img src="/images/lisbon-rooftops.jpg" alt="Lisbon" />
           <div className="veil" />
           <div className="hh">
-            <div className="dest">{dest || "Lisbon, Portugal"} — Apr 24-26</div>
-            <div className="meta">3 days · 4 friends</div>
+            <div className="dest">{dest || "Lisbon, Portugal"}{dateRange ? ` — ${dateRange}` : ""}</div>
+            <div className="meta">{days} days · 4 friends</div>
           </div>
         </div>
         <div className="hub-body">

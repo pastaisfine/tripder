@@ -12,6 +12,9 @@ const DEFAULT_STATE = {
   styleSeen: false,
   planSeen: false,
   dest: "",
+  startDate: null,
+  endDate: null,
+  leader: "alice",
   hotel: null,
   flight: null,
   styleName: "",
@@ -103,6 +106,22 @@ export function useAppState() {
     });
   }, []);
 
+  const setDates = useCallback((startDate, endDate) => {
+    setState((prev) => {
+      const next = { ...prev, startDate, endDate };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const setLeader = useCallback((leader) => {
+    setState((prev) => {
+      const next = { ...prev, leader };
+      save(next);
+      return next;
+    });
+  }, []);
+
   const markStyleSeen = useCallback((name) => {
     setState((prev) => {
       const next = { ...prev, styleSeen: true, styleName: name };
@@ -136,6 +155,8 @@ export function useAppState() {
     selectHotel,
     selectFlight,
     setDest,
+    setDates,
+    setLeader,
     markStyleSeen,
     markPlanSeen,
   };
