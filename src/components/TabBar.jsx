@@ -26,12 +26,19 @@ const IconGroup = () => (
     <path d="M16 5a3.5 3.5 0 0 1 0 6.5M17.5 14a6.5 6.5 0 0 1 4 6" />
   </svg>
 );
+const IconUser = () => (
+  <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+  </svg>
+);
 
 const TABS = [
   { to: "/hub", label: "Trip", Icon: IconTrip },
   { to: "/swipe", label: "Swipe", Icon: IconSwipe },
   { to: "/plan", label: "Plan", Icon: IconPlan },
   { to: "/group", label: "Group", Icon: IconGroup },
+  { to: "/profile", label: "Profile", Icon: IconUser },
 ];
 
 export default function TabBar({ active }) {

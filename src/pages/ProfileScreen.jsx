@@ -1,0 +1,326 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+
+export default function ProfileScreen({ useAppState }) {
+  const navigate = useNavigate();
+  const { user, profile, signOut, updateProfile, updatePassword } = useAuth();
+  const { likes = 0, skips = 0, reasonCount = 0, styleName } = useAppState || {};
+
+  // Form states
+  const [usernameInput, setUsernameInput] = useState(profile?.username || "");
+  const [avatarUrlInput, setAvatarUrlInput] = useState(profile?.avatarUrl || "");
+  const [profileMsg, setProfileMsg] = useState({ text: "", isError: false });
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Password change state
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwdMsg, setPwdMsg] = useState({ text: "", isError: false });
+  const [savingPwd, setSavingPwd] = useState(false);
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileMsg({ text: "", isError: false });
+    setSavingProfile(true);
+
+    try {
+      await updateProfile({
+        username: usernameInput.trim(),
+        avatarUrl: avatarUrlInput.trim(),
+      });
+      setProfileMsg({ text: "Profile updated successfully!", isError: false });
+    } catch (err) {
+      setProfileMsg({ text: err.message || "Failed to update profile.", isError: true });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      setPwdMsg({ text: "Password must be at least 6 characters long.", isError: true });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwdMsg({ text: "Passwords do not match.", isError: true });
+      return;
+    }
+
+    setPwdMsg({ text: "", isError: false });
+    setSavingPwd(true);
+
+    try {
+      await updatePassword(newPassword);
+      setPwdMsg({ text: "Password updated successfully!", isError: false });
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setShowPasswordChange(false), 2000);
+    } catch (err) {
+      setPwdMsg({ text: err.message || "Failed to update password.", isError: true });
+    } finally {
+      setSavingPwd(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/login");
+    } catch (err) {
+      console.error("Sign out error:", err);
+    }
+  };
+
+  if (!user) {
+    return (
+      <section className="screen active screen-profile">
+        <div className="profile-wrap">
+          <div className="profile-header-area">
+            <h1 className="h-display" style={{ fontSize: 26, margin: "0 0 6px" }}>
+              Profile
+            </h1>
+            <p className="eyebrow">Your Tripder account &amp; preferences</p>
+          </div>
+
+          <div className="bento-card" style={{ padding: "var(--card-pad)", textAlign: "center" }}>
+            <div
+              className="avatar"
+              style={{
+                width: 58,
+                height: 58,
+                fontSize: 22,
+                margin: "0 auto 14px",
+                background: "var(--accent-soft)",
+                color: "var(--accent)",
+              }}
+            >
+              ?
+            </div>
+            <h3 style={{ fontSize: 18, margin: "0 0 6px" }}>You're exploring as a guest</h3>
+            <p style={{ fontSize: 13, color: "var(--muted)", margin: "0 0 18px", lineHeight: 1.5 }}>
+              Sign in or create an account to save your travel style, manage your profile, and sync group itineraries.
+            </p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+                onClick={() => navigate("/login")}
+              >
+                Sign In
+              </button>
+              <button
+                className="btn btn-secondary"
+                style={{ flex: 1 }}
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const initial = (profile?.username || user.email || "A").slice(0, 1).toUpperCase();
+
+  return (
+    <section className="screen active screen-profile">
+      <div className="profile-wrap">
+        <div className="profile-header-area">
+          <h1 className="h-display" style={{ fontSize: 26, margin: "0 0 6px" }}>
+            Profile
+          </h1>
+          <p className="eyebrow">Your Tripder account &amp; preferences</p>
+        </div>
+
+        {/* User Card */}
+        <div className="bento-card profile-user-card" style={{ padding: "var(--card-pad)" }}>
+          <div className="profile-hero-row">
+            <div className="profile-avatar-wrap">
+              {profile?.avatarUrl ? (
+                <img src={profile.avatarUrl} alt={profile.username} className="profile-avatar-img" />
+              ) : (
+                <div className="avatar profile-avatar-fallback" style={{ background: "var(--accent)" }}>
+                  {initial}
+                </div>
+              )}
+            </div>
+            <div className="profile-hero-info">
+              <h2 style={{ fontSize: 19, margin: 0, fontWeight: 700 }}>
+                {profile?.username || "Traveler"}
+              </h2>
+              <div className="profile-email-badge">
+                <span>{user.email}</span>
+                {profile?.isEmailVerified ? (
+                  <span className="tag tag-ok" style={{ fontSize: 10, padding: "2px 7px" }}>
+                    Verified
+                  </span>
+                ) : (
+                  <span className="tag tag-warn" style={{ fontSize: 10, padding: "2px 7px" }}>
+                    Pending
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Edit Section */}
+        <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
+          <div className="bx-title">Account Details</div>
+          <div className="bx-sub" style={{ marginTop: 2, marginBottom: 14 }}>
+            Manage how other group members see you in Tripder.
+          </div>
+
+          {profileMsg.text && (
+            <div
+              className={`auth-alert ${profileMsg.isError ? "auth-alert-error" : "auth-alert-success"}`}
+              style={{ marginBottom: 14 }}
+            >
+              <span>{profileMsg.text}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleUpdateProfile}>
+            <div className="field">
+              <label htmlFor="prof-username">Display Name / Username</label>
+              <input
+                id="prof-username"
+                className="input"
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="e.g. Alex"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="prof-avatar">Profile Image URL (optional)</label>
+              <input
+                id="prof-avatar"
+                className="input"
+                type="url"
+                value={avatarUrlInput}
+                onChange={(e) => setAvatarUrlInput(e.target.value)}
+                placeholder="https://example.com/avatar.jpg"
+              />
+              <div className="hint">Direct image URL for your profile photo</div>
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-secondary btn-block"
+              disabled={savingProfile}
+            >
+              {savingProfile ? "Saving changes..." : "Save Profile Details"}
+            </button>
+          </form>
+        </div>
+
+        {/* Password Section */}
+        <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
+          <div className="bx-title">Password &amp; Security</div>
+          <div className="bx-sub" style={{ marginTop: 2, marginBottom: 12 }}>
+            Your password is secure and encrypted.
+          </div>
+
+          <div className="pwd-masked-row">
+            <div className="pwd-masked-field">
+              <span className="pwd-label">Password:</span>
+              <span className="pwd-dots">••••••••••••</span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-xs btn-secondary"
+              onClick={() => setShowPasswordChange(!showPasswordChange)}
+            >
+              {showPasswordChange ? "Cancel" : "Change Password"}
+            </button>
+          </div>
+
+          {showPasswordChange && (
+            <form onSubmit={handleUpdatePassword} style={{ marginTop: 14 }}>
+              {pwdMsg.text && (
+                <div
+                  className={`auth-alert ${pwdMsg.isError ? "auth-alert-error" : "auth-alert-success"}`}
+                  style={{ marginBottom: 14 }}
+                >
+                  <span>{pwdMsg.text}</span>
+                </div>
+              )}
+
+              <div className="field">
+                <label htmlFor="new-pwd">New Password</label>
+                <input
+                  id="new-pwd"
+                  className="input"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="At least 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="confirm-pwd">Confirm New Password</label>
+                <input
+                  id="confirm-pwd"
+                  className="input"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Re-type new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-primary btn-block"
+                disabled={savingPwd}
+              >
+                {savingPwd ? "Updating password..." : "Update Password"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Travel Persona & Swiping Stats */}
+        <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
+          <div className="bx-title">Tripder Activity</div>
+          <div className="bx-sub" style={{ marginTop: 2, marginBottom: 12 }}>
+            Your current trip voting and persona signals.
+          </div>
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            {styleName && (
+              <span className="tag tag-ok">Style: {styleName}</span>
+            )}
+            <span className="tag tag-off">{likes} Likes</span>
+            <span className="tag tag-off">{skips} Skips</span>
+            <span className="tag tag-off">{reasonCount} Reasons</span>
+          </div>
+        </div>
+
+        {/* Sign Out Button */}
+        <div style={{ padding: "4px 0 20px" }}>
+          <button
+            type="button"
+            className="btn btn-block btn-secondary"
+            onClick={handleSignOut}
+            style={{ borderColor: "var(--border)", color: "var(--nom)" }}
+          >
+            Log out
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}

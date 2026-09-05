@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import { MEMBERS } from "../data/members";
 import ProgressBar from "../components/ProgressBar";
 import { fmtDateRange, dayCount } from "../utils/date";
 
 export default function HubScreen({ useAppState }) {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const { likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate } = useAppState;
 
   const mineDone = likes + skips > 0;
@@ -28,13 +30,15 @@ export default function HubScreen({ useAppState }) {
             <h3>Who's swiped</h3>
             <div className="memberlist">
               {MEMBERS.map((m) => {
-                const finished = m.done || (m.k === "alice" && mineDone);
+                const isUser = m.k === "alice";
+                const memberName = isUser ? (profile?.username || m.n) : m.n;
+                const finished = m.done || (isUser && mineDone);
                 return (
                   <div key={m.k} className="mem" title={finished ? m.style || styleName : "not swiped yet"}>
                     <div className={`avatar ${finished ? "done" : ""}`} style={{ background: m.c }}>
-                      {m.n.slice(0, 1)}
+                      {memberName.slice(0, 1).toUpperCase()}
                     </div>
-                    <span className="nm">{m.n}</span>
+                    <span className="nm">{memberName}</span>
                     <span className="st">{finished ? "swiped" : "swiping"}</span>
                   </div>
                 );
