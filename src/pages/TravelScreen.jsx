@@ -3,7 +3,7 @@ import { HOTELS, FLIGHTS, CAR_RENTALS } from "../data/travel";
 
 export default function TravelScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { hotel, flight, selectHotel, selectFlight } = useAppState;
+  const { hotel, flight, carRental, selectHotel, selectFlight, selectCarRental } = useAppState;
 
   const hotels = HOTELS;
   const flights = FLIGHTS;
@@ -11,7 +11,7 @@ export default function TravelScreen({ useAppState }) {
 
   const hotelPicked = hotels.find((h) => h.id === hotel);
   const flightPicked = flights.find((f) => f.id === flight);
-  const both = hotel && flight;
+  const both = hotel && flight && carRental;
 
   const row = (item, kind) => (
     <div
@@ -35,7 +35,8 @@ export default function TravelScreen({ useAppState }) {
   const carRow = (item) => (
   <div
     key={item.id}
-    className="tlrow"
+    className={`tlrow ${carRental === item.id ? "sel" : ""}`}
+    onClick={() => selectCarRental(item.id)}
   >
     <div
       className="tl-thumb"
