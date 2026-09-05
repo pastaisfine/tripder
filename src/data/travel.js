@@ -12,7 +12,7 @@ export const FLIGHTS = [
 ];
 
 export const CAR_RENTALS = [
-  { id: "car-a", name: "Sixt · Compact", type: "Compact", price: "€45/day", img: "/images/car-rental.jpg", note: "Easy city driving, 5 seats" },
-  { id: "car-b", name: "Europcar · Economy", type: "Economy", price: "€38/day", img: "/images/car-rental.jpg", note: "Budget-friendly, 5 seats" },
-  { id: "car-c", name: "Hertz · SUV", type: "SUV", price: "€62/day", img: "/images/car-rental.jpg", note: "More space for groups and luggage" },
+  { id: "car-a", name: "Sixt · Compact", type: "Compact", price: "€45/day", img: "/images/SIxt.jpg", note: "Easy city driving, 5 seats" },
+  { id: "car-b", name: "Europcar · Economy", type: "Economy", price: "€38/day", img: "/images/europcar.jpeg", note: "Budget-friendly, 5 seats" },
+  { id: "car-c", name: "Hertz · SUV", type: "SUV", price: "€62/day", img: "/images/hertz.jpg", note: "More space for groups and luggage" },
 ];
