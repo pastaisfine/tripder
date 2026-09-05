@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/useAuth";
 
 const ALL_YES = [
   { name: "Time Out Market", count: 4 },
@@ -44,6 +45,8 @@ const CREDIT_BASE = [
 ];
 
 export default function GroupScreen({ useAppState }) {
+  const { profile } = useAuth();
+  const userName = profile?.username || "Alice";
   const { likes, skips } = useAppState;
   const [barAnimate, setBarAnimate] = useState(false);
 
@@ -53,7 +56,7 @@ export default function GroupScreen({ useAppState }) {
   }, []);
 
   const aliceV = Math.max(0, Math.min(97, 91 + Math.round((likes - skips) * 2)));
-  const ms = [{ name: "Alice", v: aliceV }, ...NOTABLE_MS];
+  const ms = [{ name: userName, v: aliceV }, ...NOTABLE_MS];
 
   return (
 
