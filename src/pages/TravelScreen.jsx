@@ -49,6 +49,7 @@ export default function TravelScreen({ useAppState }) {
     <div className="tl-tail">
       <div className="tl-price">{item.price}</div>
     </div>
+        <span className="tl-check">✓</span>
   </div>
   );
 
