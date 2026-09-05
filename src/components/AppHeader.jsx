@@ -1,10 +1,6 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
 
 export default function AppHeader({ trip, back, backLabel, invert }) {
-  const { user, profile } = useAuth();
-  const initial = (profile?.username || user?.email || "U").slice(0, 1).toUpperCase();
-
   return (
     <header className={`appheader ${invert ? "invert" : ""}`}>
       {back && (
@@ -16,21 +12,6 @@ export default function AppHeader({ trip, back, backLabel, invert }) {
         Trip<b>der</b>
       </Link>
       {trip && <span className="hd-trip">{trip}</span>}
-      <div className="hd-auth">
-        {user ? (
-          <Link to="/profile" className="hd-user-btn" title={profile?.username || user.email}>
-            {profile?.avatarUrl ? (
-              <img src={profile.avatarUrl} alt="avatar" className="hd-avatar-img" />
-            ) : (
-              <span className="hd-avatar-initial">{initial}</span>
-            )}
-          </Link>
-        ) : (
-          <Link to="/login" className="hd-login-link">
-            Log in
-          </Link>
-        )}
-      </div>
     </header>
   );
 }

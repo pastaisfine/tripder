@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function StyleCard({ style: { name, bars, likes, skips, reasonCount }, userName = "Alice" }) {
+export default function StyleCard({ style: { name, bars, likes, skips, reasonCount } }) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -10,7 +10,7 @@ export default function StyleCard({ style: { name, bars, likes, skips, reasonCou
 
   return (
     <div className="stylecard card">
-      <div className="st">{userName} · your travel style</div>
+      <div className="st">Alice · your travel style</div>
       <h2>{name}</h2>
       <div className="who">
         Inferred from {likes} likes, {skips} skips and {reasonCount} reasons you attached.

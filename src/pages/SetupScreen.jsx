@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Crown, Star } from "phosphor-react";
-import { useAuth } from "../context/useAuth";
 import { FRIENDS } from "../data/members";
 import { dayCount } from "../utils/date";
 
@@ -24,16 +23,13 @@ function buildMonthGrid(year, month) {
   return cells;
 }
 
+const ALL_MEMBERS = [
+  { k: "alice", n: "Alice", c: "#F19A6A", role: "Trip leader" },
+  ...FRIENDS,
+];
+
 export default function SetupScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { profile } = useAuth();
-  const myName = profile?.username || "Alice";
-
-  const allMembers = useMemo(() => [
-    { k: "alice", n: myName, c: "#F19A6A", role: "Trip leader" },
-    ...FRIENDS,
-  ], [myName]);
-
   const [dest, setDestState] = useState("");
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -214,7 +210,7 @@ export default function SetupScreen({ useAppState }) {
         <div className="field">
           <label>Invite your crew</label>
           <div className="friends">
-            {allMembers.map((f) => (
+            {ALL_MEMBERS.map((f) => (
               <div
                 key={f.k}
                 className={`friendrow ${f.k === "alice" || invited[f.k] ? "sel" : ""} ${leader === f.k ? "is-leader" : ""}`}
