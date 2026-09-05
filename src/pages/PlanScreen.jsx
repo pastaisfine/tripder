@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 import { PLAN } from "../data/plans";
 import { SATISFACTION } from "../data/styles";
 import { HOTELS, FLIGHTS } from "../data/travel";
@@ -18,6 +19,8 @@ function tagClass(tag) {
 
 export default function PlanScreen({ useAppState }) {
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const userName = profile?.username || "Alice";
   const { mode, setMode, likes, skips, markPlanSeen, hotel, flight, startDate, endDate } = useAppState;
   const [open, setOpen] = useState({});
 
@@ -42,7 +45,7 @@ export default function PlanScreen({ useAppState }) {
   const sat = SATISFACTION[mode];
   const aliceSat = Math.max(0, Math.min(97, 91 + Math.round((likes - skips) * 2)));
   const ms = [
-    { name: "Alice", v: aliceSat },
+    { name: userName, v: aliceSat },
     { name: "Ben", v: 88 },
     { name: "Priya", v: 79 },
     { name: "Marcus", v: 78 },

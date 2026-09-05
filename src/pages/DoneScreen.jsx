@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 export default function DoneScreen({ useAppState }) {
   const navigate = useNavigate();
   const { likes, skips, reasonCount } = useAppState;
+  const { profile } = useAuth();
+  const userName = profile?.username || "Alice";
 
   return (
     <section className="screen active">
         <div className="done-wrap">
-          <div className="bigcount">Done · Alice</div>
+          <div className="bigcount">Done · {userName}</div>
           <h1 className="splash-title small" style={{ marginTop: 0 }}>
-            You're done, Alice.
+            You're done, {userName}.
           </h1>
           <p className="splash-copy" style={{ maxWidth: "34ch" }}>
             {likes} likes, {skips} skips and every reason is now a weighted signal — not just a tick box.

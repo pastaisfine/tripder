@@ -1,7 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 export default function SplashScreen() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   return (
     <section className="screen active screen-splash">
       <div className="splash-photo">
@@ -24,12 +26,23 @@ export default function SplashScreen() {
             </p>
             <button
               className="btn btn-coral btn-block"
-              onClick={() => navigate("/setup")}
+              onClick={() => navigate("/login")}
             >
               Start a trip
             </button>
-            <div className="note" style={{ color: "rgba(255,255,255,.85)" }}>
-              Free · no account needed
+            <div className="note" style={{ color: "rgba(255,255,255,.85)", marginTop: 12 }}>
+              {user ? (
+                <span>
+                  Signed in as <b>{profile?.username || user.email}</b> ·{" "}
+                  <Link to="/profile" style={{ color: "#fff", textDecoration: "underline" }}>
+                    Profile
+                  </Link>
+                </span>
+              ) : (
+                <span>
+
+                </span>
+              )}
             </div>
           </div>
         </div>
