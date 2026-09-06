@@ -2882,6 +2882,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 [data-theme="dark"] .theme-toggle-btn {

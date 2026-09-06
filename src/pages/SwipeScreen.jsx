@@ -5,7 +5,7 @@ import BottomSheet from "../components/BottomSheet";
 import ReasonChips from "../components/ReasonChips";
 import { searchPlaces } from "../services/placesAutocomplete";
 
-const initialSheets = { reason: false, detail: false, addPlace: false };
+const initialSheets = { reason: false, detail: false, addPlace: false, more: false };
 
 function sheetsReducer(state, action) {
   switch (action.type) {
@@ -15,6 +15,8 @@ function sheetsReducer(state, action) {
       return { ...initialSheets, detail: true };
     case "addPlace":
       return { ...initialSheets, addPlace: true };
+    case "more":
+      return { ...initialSheets, more: true };
     case "close":
       return initialSheets;
     default:
@@ -319,6 +321,22 @@ return (
             </button>
             <button className="btn btn-primary" disabled={!placeSelected} onClick={handlePlaceConfirm}>
               Add to deck
+            </button>
+          </div>
+        </BottomSheet>
+
+        <BottomSheet
+          open={sheets.more}
+          onClose={() => dispatchSheets({ type: "close" })}
+        >
+          <h3>Plan another itinerary?</h3>
+          <p className="sub">Start a new trip and invite your group when you're ready.</p>
+          <div className="actions">
+            <button className="btn btn-secondary" onClick={() => dispatchSheets({ type: "close" })}>
+              Not yet
+            </button>
+            <button className="btn btn-primary" onClick={() => navigate("/setup")}>
+              Start a trip
             </button>
           </div>
         </BottomSheet>
