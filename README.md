@@ -19,3 +19,40 @@ Each user swipes on places and activities, and instead of just collecting a pref
 ## MVP
 
 This is the core MVP: a swipe-driven flow that captures each member's preferences *and* the reasoning behind them, then merges everything into a shared itinerary with the context needed to reach consensus.
+
+## Setup
+
+### Prerequisites
+
+- Node.js
+- Supabase project (for edge function proxy)
+
+### Environment Variables
+
+Create a `.env` file with:
+
+```
+VITE_PLACES_PROXY_URL=https://<your-project-ref>.supabase.co/functions/v1/places-autocomplete
+```
+
+### Supabase Edge Function
+
+The places autocomplete proxy lives in `supabase/functions/places-autocomplete/`. Deploy it with:
+
+```bash
+supabase functions deploy places-autocomplete --no-verify-jwt
+```
+
+Set these secrets on your Supabase project:
+
+```bash
+supabase secrets set SERP_API_KEY=<your-serpapi-key>
+supabase secrets set STATIC_MAP_KEY=<your-google-maps-static-api-key>
+```
+
+### Local Development
+
+```bash
+npm install
+npm run dev
+```
