@@ -1,8 +1,10 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAppState } from "./state/useAppState";
 import AppHeader from "./components/AppHeader";
 import TabBar from "./components/TabBar";
 import { fmtDateRange } from "./utils/date";
+import "./App.css";
 
 import SplashScreen from "./pages/SplashScreen";
 import HubScreen from "./pages/HubScreen";
@@ -31,6 +33,22 @@ function Shell() {
   const dateRange = fmtDateRange(appState.startDate, appState.endDate);
   const trip = `${appState.dest || "Lisbon, Portugal"}${dateRange ? ` · ${dateRange}` : ""}`;
 
+  const [theme, setTheme] = useState(() => {
+    return (
+      localStorage.getItem("theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    );
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   return (
     <div className="stage">
       <div className="device">
@@ -48,6 +66,8 @@ function Shell() {
                         trip={cfg.trip || trip}
                         back={cfg.back}
                         backLabel={cfg.backLabel}
+                        theme={theme}
+                        toggleTheme={toggleTheme}
                       />
                     )}
                     {path === "/" && <SplashScreen />}

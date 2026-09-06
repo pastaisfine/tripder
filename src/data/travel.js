@@ -10,3 +10,9 @@ export const FLIGHTS = [
   { id: "flight-b", name: "Ryanair · direct", dep: "11:25", arr: "13:50", price: "€128", dur: "2h25", img: "/images/jardim-estrela.jpg", note: "Cheapest, later start" },
   { id: "flight-c", name: "easyJet · direct", dep: "16:10", arr: "18:35", price: "€164", dur: "2h25", img: "/images/park-rooftop-bar.jpg", note: "Afternoon departure, red-eye return" },
 ];
+
+export const CAR_RENTALS = [
+  { id: "car-a", name: "Sixt · Compact", type: "Compact", price: "€45/day", img: "/images/SIxt.jpg", note: "Easy city driving, 5 seats" },
+  { id: "car-b", name: "Europcar · Economy", type: "Economy", price: "€38/day", img: "/images/europcar.jpeg", note: "Budget-friendly, 5 seats" },
+  { id: "car-c", name: "Hertz · SUV", type: "SUV", price: "€62/day", img: "/images/hertz.jpg", note: "More space for groups and luggage" },
+];

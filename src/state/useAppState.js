@@ -17,6 +17,7 @@ const DEFAULT_STATE = {
   leader: "alice",
   hotel: null,
   flight: null,
+  carRental: null,
   styleName: "",
 };
 
@@ -98,6 +99,14 @@ export function useAppState() {
     });
   }, []);
 
+  const selectCarRental = useCallback((id) => {
+  setState((prev) => {
+    const next = { ...prev, carRental: id };
+    save(next);
+    return next;
+    });
+  }, []);
+
   const setDest = useCallback((dest) => {
     setState((prev) => {
       const next = { ...prev, dest };
@@ -154,6 +163,7 @@ export function useAppState() {
     setMode,
     selectHotel,
     selectFlight,
+    selectCarRental,
     setDest,
     setDates,
     setLeader,
