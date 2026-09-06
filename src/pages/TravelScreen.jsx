@@ -1,16 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { HOTELS, FLIGHTS } from "../data/travel";
+import { HOTELS, FLIGHTS, CAR_RENTALS } from "../data/travel";
 
 export default function TravelScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { hotel, flight, selectHotel, selectFlight } = useAppState;
+  const { hotel, flight, carRental, selectHotel, selectFlight, selectCarRental } = useAppState;
 
   const hotels = HOTELS;
   const flights = FLIGHTS;
+  const carRentals = CAR_RENTALS;
 
   const hotelPicked = hotels.find((h) => h.id === hotel);
   const flightPicked = flights.find((f) => f.id === flight);
-  const both = hotel && flight;
+  const both = hotel && flight && carRental;
 
   const row = (item, kind) => (
     <div
@@ -29,6 +30,27 @@ export default function TravelScreen({ useAppState }) {
       </div>
       <span className="tl-check">✓</span>
     </div>
+  );
+
+  const carRow = (item) => (
+  <div
+    key={item.id}
+    className={`tlrow ${carRental === item.id ? "sel" : ""}`}
+    onClick={() => selectCarRental(item.id)}
+  >
+    <div
+      className="tl-thumb"
+      style={{ backgroundImage: `url('${item.img}')` }}
+    />
+    <div className="tl-main">
+      <div className="tl-name">{item.name}</div>
+      <div className="tl-sub">{item.type}</div>
+    </div>
+    <div className="tl-tail">
+      <div className="tl-price">{item.price}</div>
+    </div>
+        <span className="tl-check">✓</span>
+  </div>
   );
 
   return (
@@ -58,6 +80,18 @@ export default function TravelScreen({ useAppState }) {
               <div className="tllist">{flights.map((f) => row(f, "flights"))}</div>
             </div>
           </div>
+          {/* adding car rentals section */}
+        <div>
+          <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
+            <div className="travel-sec-head" style={{ marginTop: 0 }}>
+              <h2>Getting around</h2>
+              <span className="eyebrow">Car rental</span>
+            </div>
+            <div className="tllist">
+              {carRentals.map((car) => carRow(car))}
+            </div>
+          </div>          
+        </div>
         </div>
 
         {both && (
