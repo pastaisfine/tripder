@@ -11,8 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-.opencode
 .env
+.env.*
+!.env.example
+.opencode
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +26,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.agents
+.agent
+.opencode
+.claude

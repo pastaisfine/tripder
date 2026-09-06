@@ -1,20 +1,25 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useAppState } from "./state/useAppState";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
 import AppHeader from "./components/AppHeader";
 import TabBar from "./components/TabBar";
-import { fmtDateRange } from "./utils/date";
-import "./App.css";
-
-import SplashScreen from "./pages/SplashScreen";
-import HubScreen from "./pages/HubScreen";
-import SetupScreen from "./pages/SetupScreen";
-import TravelScreen from "./pages/TravelScreen";
-import SwipeScreen from "./pages/SwipeScreen";
+import { AuthProvider } from "./context/AuthContext";
 import DoneScreen from "./pages/DoneScreen";
-import StyleScreen from "./pages/StyleScreen";
-import PlanScreen from "./pages/PlanScreen";
+import ForgotPasswordScreen from "./pages/ForgotPasswordScreen";
 import GroupScreen from "./pages/GroupScreen";
+import HubScreen from "./pages/HubScreen";
+import LoginScreen from "./pages/LoginScreen";
+import PlanScreen from "./pages/PlanScreen";
+import ProfileScreen from "./pages/ProfileScreen";
+import RegisterScreen from "./pages/RegisterScreen";
+import ResetPasswordScreen from "./pages/ResetPasswordScreen";
+import SetupScreen from "./pages/SetupScreen";
+import SplashScreen from "./pages/SplashScreen";
+import StyleScreen from "./pages/StyleScreen";
+import SwipeScreen from "./pages/SwipeScreen";
+import TravelScreen from "./pages/TravelScreen";
+import { useAppState } from "./state/useAppState";
+import { fmtDateRange } from "./utils/date";
 
 const CHROME = {
   "/": { header: false, tabs: false },
@@ -26,69 +31,42 @@ const CHROME = {
   "/style": { header: true, invert: false, back: "/done", backLabel: "Done", tabs: false },
   "/plan": { header: true, invert: false, back: "/hub", backLabel: "Trip", tabs: true, active: "plan" },
   "/group": { header: true, invert: false, back: "/hub", backLabel: "Trip", tabs: true, active: "group" },
+  "/login": { header: true, invert: false, back: "/", backLabel: "Home", tabs: false },
+  "/register": { header: true, invert: false, back: "/login", backLabel: "Login", tabs: false },
+  "/profile": { header: true, invert: false, back: "/hub", backLabel: "Trip", tabs: true, active: "profile" },
+  "/forgot-password": { header: true, invert: false, back: "/login", backLabel: "Login", tabs: false },
+  "/reset-password": { header: true, invert: false, tabs: false },
 };
 
 function Shell() {
   const appState = useAppState();
   const dateRange = fmtDateRange(appState.startDate, appState.endDate);
   const trip = `${appState.dest || "Lisbon, Portugal"}${dateRange ? ` · ${dateRange}` : ""}`;
-
-  const [theme, setTheme] = useState(() => {
-    return (
-      localStorage.getItem("theme") ||
-      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-    );
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const screens = {
+    "/": <SplashScreen />,
+    "/setup": <SetupScreen useAppState={appState} />,
+    "/hub": <HubScreen useAppState={appState} />,
+    "/travel": <TravelScreen useAppState={appState} />,
+    "/swipe": <SwipeScreen useAppState={appState} />,
+    "/done": <DoneScreen useAppState={appState} />,
+    "/style": <StyleScreen useAppState={appState} />,
+    "/plan": <PlanScreen useAppState={appState} />,
+    "/group": <GroupScreen useAppState={appState} />,
+    "/login": <LoginScreen />,
+    "/register": <RegisterScreen />,
+    "/profile": <ProfileScreen useAppState={appState} />,
+    "/forgot-password": <ForgotPasswordScreen />,
+    "/reset-password": <ResetPasswordScreen />,
   };
 
-  return (
-    <div className="stage">
-      <div className="device">
-        <BrowserRouter>
-          <Routes>
-            {Object.entries(CHROME).map(([path, cfg]) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <div className="app">
-                    {cfg.header && (
-                      <AppHeader
-                        invert={cfg.invert}
-                        trip={cfg.trip || trip}
-                        back={cfg.back}
-                        backLabel={cfg.backLabel}
-                        theme={theme}
-                        toggleTheme={toggleTheme}
-                      />
-                    )}
-                    {path === "/" && <SplashScreen />}
-                    {path === "/setup" && <SetupScreen useAppState={appState} />}
-                    {path === "/hub" && <HubScreen useAppState={appState} />}
-                    {path === "/travel" && <TravelScreen useAppState={appState} />}
-                    {path === "/swipe" && <SwipeScreen useAppState={appState} />}
-                    {path === "/done" && <DoneScreen useAppState={appState} />}
-                    {path === "/style" && <StyleScreen useAppState={appState} />}
-                    {path === "/plan" && <PlanScreen useAppState={appState} />}
-                    {path === "/group" && <GroupScreen useAppState={appState} />}
-                    {cfg.tabs && <TabBar active={cfg.active} />}
-                  </div>
-                }
-              />
-            ))}
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </div>
-  );
+  return <AuthProvider><div className="stage"><div className="device"><BrowserRouter><Routes>{Object.entries(CHROME).map(([path, cfg]) => <Route key={path} path={path} element={<div className="app">{cfg.header && <AppHeader invert={cfg.invert} trip={cfg.trip || trip} back={cfg.back} backLabel={cfg.backLabel} theme={theme} toggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />}{screens[path]}{cfg.tabs && <TabBar active={cfg.active} />}</div>} />)}</Routes></BrowserRouter></div></div></AuthProvider>;
 }
 
 export default Shell;
