@@ -25,6 +25,7 @@ const DEFAULT_STATE = {
   itineraryDrafts: {},
   userSuggestedItineraries: [],
   nextSuggestedNumber: 1,
+  preferenceProfiles: {},
 };
 
 function isDefaultItinerary(id) {
@@ -47,7 +48,12 @@ function load() {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      return { ...DEFAULT_STATE, ...s };
+      const addedCards = (s.addedCards || []).map((card) =>
+        card.img === "/images/hero-lisbon.jpg" || card.img === "/images/lisbon-rooftops.jpg"
+          ? { ...card, img: "/images/alfama.jpg" }
+          : card,
+      );
+      return { ...DEFAULT_STATE, ...s, addedCards };
     }
   } catch {}
   return { ...DEFAULT_STATE };
@@ -266,6 +272,14 @@ export function useAppState() {
     });
   }, []);
 
+  const savePreferenceProfile = useCallback((profileId, preferences) => {
+    setState((prev) => {
+      const next = { ...prev, preferenceProfiles: { ...prev.preferenceProfiles, [profileId]: preferences } };
+      save(next);
+      return next;
+    });
+  }, []);
+
   const allCards = useMemo(() => [...CARD_DATA, ...state.addedCards], [state.addedCards]);
 
   const reasonCount = useMemo(
@@ -310,5 +324,6 @@ export function useAppState() {
     markStyleSeen,
     markPlanSeen,
     appendCard,
+    savePreferenceProfile,
   };
 }

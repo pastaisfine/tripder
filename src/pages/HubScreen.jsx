@@ -43,7 +43,7 @@ export default function HubScreen({ useAppState }) {
       </div>
         <div className="hub-hero">
           <div className="scrim-top" />
-          <img src="/images/lisbon-rooftops.jpg" alt="Lisbon" />
+          <img src="/images/miradouro-santa-luzia.jpg" alt="Lisbon" />
           <div className="veil" />
           <div className="hh">
             <div className="dest">{dest || "Lisbon, Portugal"}{dateRange ? ` — ${dateRange}` : ""}</div>

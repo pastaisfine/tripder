@@ -1,7 +1,7 @@
 export const HOTELS = [
   { id: "hotel-a", name: "Memmo Alfama", area: "Alfama", price: "€180", rate: "9.4", img: "/images/alfama.jpg", note: "Boutique, 12 min from the tasca tables" },
   { id: "hotel-b", name: "Santiago do Alfama", area: "Castelo", price: "€210", rate: "9.2", img: "/images/miradouro-santa-luzia.jpg", note: "Design stay with a rooftop pool" },
-  { id: "hotel-c", name: "The Lumiares", area: "Bairro Alto", price: "€160", rate: "8.9", img: "/images/lisbon-rooftops.jpg", note: "Apartment-style, near the nightlife" },
+  { id: "hotel-c", name: "The Lumiares", area: "Bairro Alto", price: "€160", rate: "8.9", img: "/images/alfama.jpg", note: "Apartment-style, near the nightlife" },
   { id: "hotel-d", name: "H10 Duque de Loulé", area: "Avenida", price: "€140", rate: "8.6", img: "/images/gulbenkian.jpg", note: "Central budget pick, easy metro access" },
 ];
 

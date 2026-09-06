@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Moon, SunDim } from "phosphor-react";
 import { useAuth } from "../context/useAuth";
 
 export default function AppHeader({ trip, back, backLabel, invert, theme, toggleTheme }) {
@@ -13,7 +14,7 @@ export default function AppHeader({ trip, back, backLabel, invert, theme, toggle
         {trip && <span className="hd-trip">{trip}</span>}
       </div>
       <div className="hd-right">
-        {toggleTheme && <button type="button" onClick={toggleTheme} className="theme-toggle-btn">{theme === "dark" ? "Light Mode" : "Dark Mode"}</button>}
+        {toggleTheme && <button type="button" onClick={toggleTheme} className="theme-toggle-btn" title={theme === "dark" ? "Light Mode" : "Dark Mode"} aria-label={theme === "dark" ? "Light Mode" : "Dark Mode"}>{theme === "dark" ? <SunDim size={18} weight="bold" /> : <Moon size={18} weight="bold" />}</button>}
         <div className="hd-auth">
           {user ? <Link to="/profile" className="hd-user-btn" title={profile?.username || user.email}>{profile?.avatarUrl ? <img src={profile.avatarUrl} alt="avatar" className="hd-avatar-img" /> : <span className="hd-avatar-initial">{initial}</span>}</Link> : <Link to="/login" className="hd-login-link">Log in</Link>}
         </div>

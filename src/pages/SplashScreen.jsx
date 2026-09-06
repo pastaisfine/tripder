@@ -7,7 +7,7 @@ export default function SplashScreen() {
   return (
     <section className="screen active screen-splash">
       <div className="splash-photo">
-        <img src="/images/lisbon-rooftops.jpg" alt="Lisbon rooftops" />
+        <img src="/images/alfama.jpg" alt="Lisbon rooftops" />
       </div>
       <div className="splash-content">
         <div className="splash-in">

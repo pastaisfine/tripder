@@ -9,7 +9,8 @@ export default function StyleScreen({ useAppState }) {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const userName = profile?.username || "Alice";
-  const { likes, skips, reasonCount, tagged, markStyleSeen, allCards } = useAppState;
+  const { likes, skips, reasonCount, tagged, markStyleSeen, allCards, preferenceProfiles } = useAppState;
+  const preferences = preferenceProfiles?.[profile?.id || profile?.username || "guest"];
 
   const style = useMemo(
     () => computeStyle(tagged, likes, skips, reasonCount),
@@ -54,7 +55,16 @@ export default function StyleScreen({ useAppState }) {
         </div>
         <div className="done-wrap">
           <div className="bigcount">Style · {userName}</div>
-          <StyleCard style={style} userName={userName} />
+           <StyleCard style={style} userName={userName} />
+
+           {preferences && (preferences.completed || preferences.skipped) && <div className="bento-card preference-summary">
+             <div className="bx-title">{userName}'s trip preferences</div>
+             {preferences.skipped ? <p className="sub">Skipped for now. You can add these preferences later.</p> : <div className="preference-summary-grid">
+               {[ ["Rhythm", preferences.rhythm], ["Pace", preferences.density], ["Dining", preferences.dining], ["Food", preferences.foodBudget], ["Dietary", preferences.dietary?.join(", ") || "None"] ].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value || "No preference"}</strong></div>)}
+             </div>}
+             {preferences.note && <p className="sub preference-note"><strong>Requirements:</strong> {preferences.note}</p>}
+             <button className="btn btn-secondary" onClick={() => { sessionStorage.setItem("edit-preferences", "true"); navigate("/swipe"); }}>Edit preferences</button>
+           </div>}
 
           <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
             <div className="bx-title">Everyone else in the group</div>

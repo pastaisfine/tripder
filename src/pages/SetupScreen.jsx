@@ -4,6 +4,8 @@ import { Crown, Star } from "phosphor-react";
 import { useAuth } from "../context/useAuth";
 import { FRIENDS } from "../data/members";
 import { dayCount } from "../utils/date";
+import BottomSheet from "../components/BottomSheet";
+import PreferenceForm, { EMPTY_PREFERENCES } from "../components/PreferenceForm";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -32,6 +34,10 @@ export default function SetupScreen({ useAppState }) {
   const today = useMemo(() => { const date = new Date(); date.setHours(0, 0, 0, 0); return date; }, []);
   const [calMonth, setCalMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const { setDest: saveDest, setDates, setLeader, startDate: savedStart, endDate: savedEnd, leader } = useAppState;
+  const { preferenceProfiles, savePreferenceProfile } = useAppState;
+  const preferenceId = profile?.id || profile?.username || "guest";
+  const [preferenceOpen, setPreferenceOpen] = useState(false);
+  const [preferences, setPreferences] = useState(() => ({ ...EMPTY_PREFERENCES, ...preferenceProfiles?.[preferenceId], dietary: preferenceProfiles?.[preferenceId]?.dietary || [] }));
   const [localStart, setLocalStart] = useState(() => savedStart ? new Date(savedStart) : null);
   const [localEnd, setLocalEnd] = useState(() => savedEnd ? new Date(savedEnd) : null);
   const allMembers = useMemo(() => [{ k: "alice", n: profile?.username || "Alice", c: "#F19A6A", role: "Trip leader" }, ...FRIENDS], [profile?.username]);
@@ -61,6 +67,13 @@ export default function SetupScreen({ useAppState }) {
     try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1600); }
     catch { setCopied(false); }
   };
+  const continueToSwipe = (skipped = false) => {
+    savePreferenceProfile(preferenceId, { ...preferences, completed: !skipped, skipped });
+    saveDest(dest.trim() || "Lisbon, Portugal");
+    setPreferenceOpen(false);
+    navigate("/swipe");
+  };
+  const toggleDietary = (option) => setPreferences((current) => { const dietary = current.dietary || []; if (option === "None") return { ...current, dietary: dietary.includes("None") ? [] : ["None"] }; return { ...current, dietary: [...dietary.filter((item) => item !== "None"), ...(dietary.includes(option) ? [] : [option])] }; });
 
   return (
     <section className="screen active screen-setup">
@@ -69,7 +82,7 @@ export default function SetupScreen({ useAppState }) {
       <div className="field"><label>Destination</label><input className="input" value={dest} onChange={(event) => setDest(event.target.value)} placeholder="Lisbon, Portugal" /><div className="hint">Trip name auto-fills from your destination</div></div>
       <div className="field">
         <label>When</label>
-        <div className="cal-wrap"><div className="cal-nav"><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, -1))} disabled={calMonth <= today}>‹</button><span className="cal-title">{MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}</span><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, 1))}>›</button></div>
+        <div className="cal-wrap" style={{ zoom: 1.5, margin: "0 auto" }}><div className="cal-nav"><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, -1))} disabled={calMonth <= today}>‹</button><span className="cal-title">{MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}</span><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, 1))}>›</button></div>
           <div className="cal-grid">{DAYS.map((day) => <div key={day} className="cal-head">{day}</div>)}{grid.map((date, index) => {
             if (!date) return <div key={`empty-${index}`} className="cal-day empty" />;
             const past = date < today;
@@ -84,7 +97,8 @@ export default function SetupScreen({ useAppState }) {
       <div className="field"><label>Invite your crew</label><div className="friends">{allMembers.map((friend) => <div key={friend.k} className={`friendrow ${friend.k === "alice" || invited[friend.k] ? "sel" : ""} ${leader === friend.k ? "is-leader" : ""}`} onClick={() => friend.k !== "alice" && setInvited((current) => ({ ...current, [friend.k]: !current[friend.k] }))}><div className="avatar sm" style={{ background: friend.c }}>{friend.n.slice(0, 2)}</div><div><div className="fname">{friend.n}{friend.k === "alice" && <span className="you-tag">you</span>}</div><div className="frole">{friend.role}</div></div>{leader === friend.k && <Crown className="leader-badge" size={18} weight="fill" title="Trip leader" />}{friend.k !== "alice" && <button className="leader-xfer" title="Make trip leader" onClick={(event) => { event.stopPropagation(); setLeader(friend.k); }}><Star size={14} weight="fill" /></button>}<span className="fcheck">✓</span></div>)}</div><div className="hint">Tap ★ to pass the leader role</div></div>
       <button className="invite-btn" onClick={() => setInviteOpen((open) => !open)}><span className="plus">+</span> Copy invite link</button>
       {inviteOpen && <div className="invitebox"><div className="invitebox-title">Invite the group</div><div className="invitebox-desc">Share this link - they'll land straight on the swipe screen.</div><div className="invitebox-copy"><input className="input" readOnly value={link} /><button className="btn btn-secondary" style={{ minHeight: 44 }} onClick={copyInvite}>{copied ? "Copied" : "Copy link"}</button></div></div>}
-      <button className="btn btn-primary btn-block" style={{ marginTop: 20 }} onClick={() => { saveDest(dest.trim() || "Lisbon, Portugal"); navigate("/swipe"); }}>Create trip & invite group</button>
+       <button className="btn btn-primary btn-block" style={{ marginTop: 20 }} onClick={() => setPreferenceOpen(true)}>Create trip & invite group</button>
+       <BottomSheet open={preferenceOpen} onClose={() => continueToSwipe(true)} className="preference-sheet"><PreferenceForm preferences={preferences} onChange={(key, value) => setPreferences((current) => ({ ...current, [key]: value }))} onDietaryToggle={toggleDietary} onSkip={() => continueToSwipe(true)} onSave={() => continueToSwipe(false)} /></BottomSheet>
     </section>
   );
 }

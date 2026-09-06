@@ -1,12 +1,21 @@
-import { useState, useReducer, useRef, useCallback, useMemo } from "react";
+import { useState, useReducer, useRef, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SwipeCard from "../components/SwipeCard";
 import BottomSheet from "../components/BottomSheet";
 import ReasonChips from "../components/ReasonChips";
 import InfiniteSpiral from "../components/InfiniteSpiral";
 import { searchPlaces } from "../services/placesAutocomplete";
+import { useAuth } from "../context/useAuth";
 
 const initialSheets = { reason: false, detail: false, addPlace: false, more: false };
+const preferenceOptions = {
+  rhythm: ["Early start", "Balanced", "Relaxed mornings", "No preference"],
+  density: ["Packed", "Balanced", "Unstructured", "No preference"],
+  dining: ["Street food", "Cafes", "Quick service", "Fine dining", "No preference"],
+  foodBudget: ["Value-focused", "Balanced", "Food is a highlight", "No preference"],
+  dietary: ["None", "Vegetarian", "Vegan", "Halal", "Kosher", "Gluten-free", "Dairy-free", "Nut allergy", "Other"],
+};
+const emptyPreferences = { rhythm: "", density: "", dietary: [], dining: "", foodBudget: "", note: "" };
 
 function sheetsReducer(state, action) {
   switch (action.type) {
@@ -44,7 +53,19 @@ const HeartIcon = () => (
 
 export default function SwipeScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { idx, likes, skips, reasonCount, swipeCard, saveReason, allCards, appendCard } = useAppState;
+  const { profile } = useAuth();
+  const { idx, likes, skips, reasonCount, swipeCard, saveReason, allCards, appendCard, preferenceProfiles, savePreferenceProfile } = useAppState;
+  const preferenceId = profile?.id || profile?.username || "guest";
+  const [preferenceOpen, setPreferenceOpen] = useState(() => sessionStorage.getItem("edit-preferences") === "true");
+  const [preferences, setPreferences] = useState(() => ({ ...emptyPreferences, ...preferenceProfiles?.[preferenceId], dietary: preferenceProfiles?.[preferenceId]?.dietary || [] }));
+  useEffect(() => {
+    const saved = preferenceProfiles?.[preferenceId];
+    if (saved) setPreferences({ ...emptyPreferences, ...saved, dietary: saved.dietary || [] });
+    if (sessionStorage.getItem("edit-preferences") === "true") {
+      sessionStorage.removeItem("edit-preferences");
+      setPreferenceOpen(true);
+    }
+  }, [preferenceId, preferenceProfiles]);
   const [sheets, dispatchSheets] = useReducer(sheetsReducer, initialSheets);
   const [reasonCard, setReasonCard] = useState(null);
   const [reasonDir, setReasonDir] = useState("yes");
@@ -129,7 +150,7 @@ export default function SwipeScreen({ useAppState }) {
       area: placeSelected.secondaryText || "Custom location",
       cat: ["Custom"],
       cost: "—",
-      img: placeSelected.mapImageUrl || "/images/hero-lisbon.jpg",
+      img: placeSelected.mapImageUrl || "/images/alfama.jpg",
       blurb: placeSelected.description,
       likeR: ["User-added location"],
       noR: [],
@@ -142,8 +163,26 @@ export default function SwipeScreen({ useAppState }) {
     dispatchSheets({ type: "close" });
   };
 
+  const savePreferences = () => {
+    savePreferenceProfile(preferenceId, { ...preferences, completed: true });
+    setPreferenceOpen(false);
+  };
+
+  const skipPreferences = () => {
+    savePreferenceProfile(preferenceId, { ...preferences, completed: false, skipped: true });
+    setPreferenceOpen(false);
+  };
+
+  const toggleDietary = (option) => {
+    setPreferences((current) => {
+      if (option === "None") return { ...current, dietary: current.dietary.includes("None") ? [] : ["None"] };
+      const dietary = current.dietary || [];
+      return { ...current, dietary: [...dietary.filter((item) => item !== "None"), ...(dietary.includes(option) ? [] : [option])] };
+    });
+  };
+
 return (
-      <section className="screen active spiral-screen spiral-screen--swipe">
+      <section className="screen active spiral-screen spiral-screen--swipe" style={{ overflow: "hidden" }}>
         <div className="spiral-backdrop" aria-hidden="true">
           <InfiniteSpiral
             items={spiralItems}
@@ -224,8 +263,23 @@ return (
             <button className="sw-btn yes" onClick={() => handleVerdict("yes")} aria-label="Like">
               <HeartIcon />
             </button>
-          </div>
+         </div>
         )}
+
+        <BottomSheet open={preferenceOpen} onClose={() => setPreferenceOpen(false)} className="preference-sheet">
+          <div className="eyebrow">Before you swipe</div>
+          <h3>Your trip rhythm</h3>
+          <p className="sub">A few light preferences help us shape your recommendations later. You can skip this for now.</p>
+          {[["rhythm", "Daily rhythm"], ["density", "Itinerary density"], ["dining", "Dining style"], ["foodBudget", "Food budgeting"]].map(([key, label]) => (
+            <div className="preference-group" key={key}>
+              <label>{label}</label>
+              <div className="preference-options">{preferenceOptions[key].map((option) => <button type="button" key={option} className={`preference-option ${preferences[key] === option ? "sel" : ""}`} onClick={() => setPreferences((current) => ({ ...current, [key]: option }))}>{option}</button>)}</div>
+            </div>
+          ))}
+          <div className="preference-group"><label>Dietary restrictions</label><div className="preference-options">{preferenceOptions.dietary.map((option) => <button type="button" key={option} className={`preference-option ${(preferences.dietary || []).includes(option) ? "sel" : ""}`} onClick={() => toggleDietary(option)}>{option}</button>)}</div></div>
+          <input className="input" value={preferences.note} onChange={(event) => setPreferences((current) => ({ ...current, note: event.target.value }))} placeholder="Allergies or requirements (optional)" />
+          <div className="actions"><button className="btn btn-secondary" onClick={skipPreferences}>Skip for now</button><button className="btn btn-primary" onClick={savePreferences}>Save preferences</button></div>
+        </BottomSheet>
 
         <BottomSheet
           open={sheets.reason}

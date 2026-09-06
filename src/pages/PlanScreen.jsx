@@ -259,7 +259,7 @@ export default function PlanScreen({ useAppState }) {
       name: place.mainText,
       area: place.secondaryText || "Custom location",
       tags: ["User-added"],
-      img: place.mapImageUrl || "/images/hero-lisbon.jpg",
+      img: place.mapImageUrl || "/images/alfama.jpg",
       exp: place.description || "Added by you.",
       userAdded: true,
     };
