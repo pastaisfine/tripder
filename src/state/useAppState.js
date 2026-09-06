@@ -9,6 +9,7 @@ const DEFAULT_STATE = {
   skips: 0,
   mode: "balanced",
   tagged: {},
+  addedCards: [],
   styleSeen: false,
   planSeen: false,
   dest: "",
@@ -147,14 +148,25 @@ export function useAppState() {
     });
   }, []);
 
+  const appendCard = useCallback((card) => {
+    setState((prev) => {
+      const next = { ...prev, addedCards: [...prev.addedCards, card] };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const allCards = useMemo(() => [...CARD_DATA, ...state.addedCards], [state.addedCards]);
+
   const reasonCount = useMemo(
     () => Object.values(state.tagged).reduce((sum, t) => sum + (t.reasons?.length || 0), 0),
     [state.tagged],
   );
-  const finished = state.idx >= CARD_DATA.length;
+  const finished = state.idx >= allCards.length;
 
   return {
     ...state,
+    allCards,
     finished,
     reasonCount,
     update,
@@ -169,5 +181,6 @@ export function useAppState() {
     setLeader,
     markStyleSeen,
     markPlanSeen,
+    appendCard,
   };
 }

@@ -1,11 +1,11 @@
-import { useState, useReducer } from "react";
+import { useState, useReducer, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { CARD_DATA } from "../data/cards";
 import SwipeCard from "../components/SwipeCard";
 import BottomSheet from "../components/BottomSheet";
 import ReasonChips from "../components/ReasonChips";
+import { searchPlaces } from "../services/placesAutocomplete";
 
-const initialSheets = { reason: false, detail: false };
+const initialSheets = { reason: false, detail: false, addPlace: false };
 
 function sheetsReducer(state, action) {
   switch (action.type) {
@@ -13,6 +13,8 @@ function sheetsReducer(state, action) {
       return { ...initialSheets, reason: true };
     case "detail":
       return { ...initialSheets, detail: true };
+    case "addPlace":
+      return { ...initialSheets, addPlace: true };
     case "close":
       return initialSheets;
     default:
@@ -39,7 +41,7 @@ const HeartIcon = () => (
 
 export default function SwipeScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { idx, likes, skips, reasonCount, swipeCard, saveReason } = useAppState;
+  const { idx, likes, skips, reasonCount, swipeCard, saveReason, allCards, appendCard } = useAppState;
   const [sheets, dispatchSheets] = useReducer(sheetsReducer, initialSheets);
   const [reasonCard, setReasonCard] = useState(null);
   const [reasonDir, setReasonDir] = useState("yes");
@@ -47,11 +49,19 @@ export default function SwipeScreen({ useAppState }) {
   const [reasonFree, setReasonFree] = useState("");
   const [detailCard, setDetailCard] = useState(null);
 
-  const remaining = CARD_DATA.slice(idx);
-  const total = CARD_DATA.length;
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [placeResults, setPlaceResults] = useState([]);
+  const [placeSelected, setPlaceSelected] = useState(null);
+  const [placeLoading, setPlaceLoading] = useState(false);
+  const [placeError, setPlaceError] = useState("");
+  const debounceRef = useRef(null);
+  const searchSeqRef = useRef(0);
+
+  const remaining = allCards.slice(idx);
+  const total = allCards.length;
 
   const handleVerdict = (dir) => {
-    const card = CARD_DATA[idx];
+    const card = allCards[idx];
     if (!card) return;
     swipeCard(dir);
     setReasonCard(card);
@@ -73,8 +83,56 @@ export default function SwipeScreen({ useAppState }) {
   };
 
   const openDetail = (card) => {
-    setDetailCard(card || (idx < total ? CARD_DATA[idx] : null));
+    setDetailCard(card || (idx < total ? allCards[idx] : null));
     dispatchSheets({ type: "detail" });
+  };
+
+  const handlePlaceSearch = useCallback((value) => {
+    const searchSeq = ++searchSeqRef.current;
+    setPlaceQuery(value);
+    setPlaceSelected(null);
+    setPlaceError("");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (value.trim().length < 2) {
+      setPlaceResults([]);
+      setPlaceLoading(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setPlaceLoading(true);
+      try {
+        const results = await searchPlaces(value);
+        if (searchSeq === searchSeqRef.current) setPlaceResults(results);
+      } catch (err) {
+        if (searchSeq === searchSeqRef.current && err.name !== "AbortError") {
+          setPlaceError(err.message || "Search failed");
+          setPlaceResults([]);
+        }
+      } finally {
+        if (searchSeq === searchSeqRef.current) setPlaceLoading(false);
+      }
+    }, 350);
+  }, []);
+
+  const handlePlaceConfirm = () => {
+    if (!placeSelected) return;
+    const card = {
+      id: `user-${placeSelected.placeId}`,
+      name: placeSelected.mainText,
+      area: placeSelected.secondaryText || "Custom location",
+      cat: ["Custom"],
+      cost: "—",
+      img: placeSelected.mapImageUrl || "/images/hero-lisbon.jpg",
+      blurb: placeSelected.description,
+      likeR: ["User-added location"],
+      noR: [],
+      detail: [placeSelected.description],
+    };
+    appendCard(card);
+    setPlaceQuery("");
+    setPlaceResults([]);
+    setPlaceSelected(null);
+    dispatchSheets({ type: "close" });
   };
 
 return (
@@ -104,7 +162,7 @@ return (
               <button className="btn btn-primary" onClick={() => navigate("/style")}>
                 See my summary
               </button>
-              <button className="btn btn-secondary" style={{ marginTop: 8 }}>
+              <button className="btn btn-secondary" style={{ marginTop: 8 }} onClick={() => dispatchSheets({ type: "addPlace" })}>
                 More itineraries on your mind?
               </button>
             </div>
@@ -203,6 +261,66 @@ return (
               </ul>
             </div>
           )}
+        </BottomSheet>
+
+        <BottomSheet
+          open={sheets.addPlace}
+          onClose={() => dispatchSheets({ type: "close" })}
+        >
+          <h3>Add a place</h3>
+          <p className="sub">Search Google Maps to add a location to your swipe deck.</p>
+
+          <input
+            className="addplace-input"
+            placeholder="Search places..."
+            value={placeQuery}
+            onChange={(e) => handlePlaceSearch(e.target.value)}
+          />
+
+          {placeError && <div className="addplace-error">{placeError}</div>}
+
+          {placeLoading && <div className="addplace-status">Searching...</div>}
+
+          {!placeLoading && placeResults.length > 0 && !placeSelected && (
+            <div className="addplace-results">
+              {placeResults.map((r) => (
+                <button
+                  key={r.placeId}
+                  className="addplace-result"
+                  onClick={() => { setPlaceSelected(r); setPlaceQuery(r.mainText); setPlaceResults([]); }}
+                >
+                  <span className="apr-main">{r.mainText}</span>
+                  <span className="apr-sub">{r.secondaryText}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!placeLoading && placeResults.length === 0 && placeQuery.length >= 2 && !placeSelected && !placeError && (
+            <div className="addplace-status">No results found</div>
+          )}
+
+          {placeSelected && (
+            <div className="addplace-preview">
+              <div className="addplace-preview-label">Selected place</div>
+              <div className="addplace-preview-name">{placeSelected.mainText}</div>
+              <div className="addplace-preview-sub">{placeSelected.secondaryText}</div>
+              {placeSelected.mapImageUrl ? (
+                <img className="addplace-map" src={placeSelected.mapImageUrl} alt="Map preview" />
+              ) : (
+                <div className="addplace-map addplace-map-placeholder">No map preview available</div>
+              )}
+            </div>
+          )}
+
+          <div className="actions">
+            <button className="btn btn-secondary" onClick={() => dispatchSheets({ type: "close" })}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" disabled={!placeSelected} onClick={handlePlaceConfirm}>
+              Add to deck
+            </button>
+          </div>
         </BottomSheet>
       </section>
   );
