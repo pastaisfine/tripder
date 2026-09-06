@@ -26,7 +26,7 @@ export default function SplashScreen() {
             </p>
             <button
               className="btn btn-coral btn-block"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/setup")}
             >
               Start a trip
             </button>

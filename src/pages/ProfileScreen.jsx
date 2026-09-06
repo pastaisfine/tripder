@@ -2,16 +2,45 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
-export default function ProfileScreen({ useAppState }) {
-  const navigate = useNavigate();
-  const { user, profile, signOut, updateProfile, updatePassword } = useAuth();
-  const { likes = 0, skips = 0, reasonCount = 0, styleName } = useAppState || {};
-
-  // Form states
+function ProfileDetailsForm({ profile, updateProfile }) {
   const [usernameInput, setUsernameInput] = useState(profile?.username || "");
   const [avatarUrlInput, setAvatarUrlInput] = useState(profile?.avatarUrl || "");
   const [profileMsg, setProfileMsg] = useState({ text: "", isError: false });
   const [savingProfile, setSavingProfile] = useState(false);
+
+  const handleUpdateProfile = async (event) => {
+    event.preventDefault();
+    setProfileMsg({ text: "", isError: false });
+    setSavingProfile(true);
+
+    try {
+      await updateProfile({ username: usernameInput.trim(), avatarUrl: avatarUrlInput.trim() });
+      setProfileMsg({ text: "Profile updated successfully!", isError: false });
+    } catch (error) {
+      setProfileMsg({ text: error.message || "Failed to update profile.", isError: true });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  return (
+    <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
+      <div className="bx-title">Account Details</div>
+      <div className="bx-sub" style={{ marginTop: 2, marginBottom: 14 }}>Manage how other group members see you in Tripder.</div>
+      {profileMsg.text && <div className={`auth-alert ${profileMsg.isError ? "auth-alert-error" : "auth-alert-success"}`} style={{ marginBottom: 14 }}><span>{profileMsg.text}</span></div>}
+      <form onSubmit={handleUpdateProfile}>
+        <div className="field"><label htmlFor="prof-username">Display Name / Username</label><input id="prof-username" className="input" type="text" value={usernameInput} onChange={(event) => setUsernameInput(event.target.value)} placeholder="e.g. Alex" /></div>
+        <div className="field"><label htmlFor="prof-avatar">Profile Image URL (optional)</label><input id="prof-avatar" className="input" type="url" value={avatarUrlInput} onChange={(event) => setAvatarUrlInput(event.target.value)} placeholder="https://example.com/avatar.jpg" /><div className="hint">Direct image URL for your profile photo</div></div>
+        <button type="submit" className="btn btn-secondary btn-block" disabled={savingProfile}>{savingProfile ? "Saving changes..." : "Save Profile Details"}</button>
+      </form>
+    </div>
+  );
+}
+
+export default function ProfileScreen({ useAppState }) {
+  const navigate = useNavigate();
+  const { user, profile, signOut, updateProfile, updatePassword } = useAuth();
+  const { likes = 0, skips = 0, reasonCount = 0, styleName } = useAppState || {};
 
   // Password change state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -19,24 +48,6 @@ export default function ProfileScreen({ useAppState }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwdMsg, setPwdMsg] = useState({ text: "", isError: false });
   const [savingPwd, setSavingPwd] = useState(false);
-
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    setProfileMsg({ text: "", isError: false });
-    setSavingProfile(true);
-
-    try {
-      await updateProfile({
-        username: usernameInput.trim(),
-        avatarUrl: avatarUrlInput.trim(),
-      });
-      setProfileMsg({ text: "Profile updated successfully!", isError: false });
-    } catch (err) {
-      setProfileMsg({ text: err.message || "Failed to update profile.", isError: true });
-    } finally {
-      setSavingProfile(false);
-    }
-  };
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
@@ -169,57 +180,7 @@ export default function ProfileScreen({ useAppState }) {
           </div>
         </div>
 
-        {/* Profile Edit Section */}
-        <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
-          <div className="bx-title">Account Details</div>
-          <div className="bx-sub" style={{ marginTop: 2, marginBottom: 14 }}>
-            Manage how other group members see you in Tripder.
-          </div>
-
-          {profileMsg.text && (
-            <div
-              className={`auth-alert ${profileMsg.isError ? "auth-alert-error" : "auth-alert-success"}`}
-              style={{ marginBottom: 14 }}
-            >
-              <span>{profileMsg.text}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleUpdateProfile}>
-            <div className="field">
-              <label htmlFor="prof-username">Display Name / Username</label>
-              <input
-                id="prof-username"
-                className="input"
-                type="text"
-                value={usernameInput}
-                onChange={(e) => setUsernameInput(e.target.value)}
-                placeholder="e.g. Alex"
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="prof-avatar">Profile Image URL (optional)</label>
-              <input
-                id="prof-avatar"
-                className="input"
-                type="url"
-                value={avatarUrlInput}
-                onChange={(e) => setAvatarUrlInput(e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-              />
-              <div className="hint">Direct image URL for your profile photo</div>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-secondary btn-block"
-              disabled={savingProfile}
-            >
-              {savingProfile ? "Saving changes..." : "Save Profile Details"}
-            </button>
-          </form>
-        </div>
+        <ProfileDetailsForm key={user.id} profile={profile} updateProfile={updateProfile} />
 
         {/* Password Section */}
         <div className="bento-card" style={{ padding: "var(--card-pad)" }}>
