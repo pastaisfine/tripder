@@ -1,15 +1,24 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
-import { PLAN } from "../data/plans";
+import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable } from "@dnd-kit/react";
+import { PointerActivationConstraints } from "@dnd-kit/dom";
+import { PLAN, ROUTE_LEGS } from "../data/plans";
 import { SATISFACTION } from "../data/styles";
 import { HOTELS, FLIGHTS } from "../data/travel";
 import SatisfactionRing from "../components/SatisfactionRing";
+import BottomSheet from "../components/BottomSheet";
+import { searchPlaces } from "../services/placesAutocomplete";
 
 const MODES = ["balanced", "foodfirst", "slower"];
 const MODE_LABELS = { balanced: "Balanced", foodfirst: "Food-first", slower: "Slower pace" };
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const DND_SENSORS = [
+  PointerSensor.configure({
+    activationConstraints: () => [new PointerActivationConstraints.Delay({ value: 300, tolerance: 8 })],
+  }),
+  KeyboardSensor,
+];
 
 function tagClass(tag) {
   if (tag.includes("4/4")) return "tag-ok";
@@ -17,155 +26,367 @@ function tagClass(tag) {
   return "tag-off";
 }
 
+function nextStopTime(stops) {
+  const last = stops.at(-1)?.t;
+  if (!last) return "09:00";
+  const [hour, minute] = last.split(":").map(Number);
+  const next = Math.min(hour * 60 + minute + 60, 23 * 60 + 59);
+  return `${String(Math.floor(next / 60)).padStart(2, "0")}:${String(next % 60).padStart(2, "0")}`;
+}
+
+function isChronological(stops) {
+  return stops.every((stop, index) => index === 0 || stop.t > stops[index - 1].t);
+}
+
+function reorderStops(stops, from, to) {
+  const times = stops.map((stop) => stop.t);
+  const next = [...stops];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next.map((stop, index) => ({ ...stop, t: times[index] }));
+}
+
+const WalkIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="13" cy="4" r="2" />
+    <path d="m10 22 2-6-2-3 2-4 3 2 3 1M12 9l-3 2-2 4M14 16l4 6" />
+  </svg>
+);
+
+function DragPreview({ stop }) {
+  return (
+    <div className="stop-drag-preview" aria-hidden="true">
+      <div className="stop card open">
+        <div className="stop-top">
+          <div className="th"><img src={stop.img} alt="" /></div>
+          <div><div className="nm">{stop.name}</div><div className="ar">{stop.area}</div></div>
+        </div>
+        <div className="stop-tags">{stop.tags.map((tag) => <span key={tag} className={`chip ${tagClass(tag)}`}>{tag}</span>)}</div>
+      </div>
+    </div>
+  );
+}
+
+function DroppableStop({ stop, index, stops, open, menuId, setOpen, setMenuId, setSheetAction, moveStop, removeStop, updateTime }) {
+  const { ref: draggableRef, handleRef, isDragSource } = useDraggable({ id: stop.id, type: "itinerary-stop" });
+  const { ref: droppableRef, isDropTarget } = useDroppable({ id: `drop:${stop.id}`, accept: "itinerary-stop" });
+  const leg = index < stops.length - 1 ? ROUTE_LEGS[`${stop.id}:${stops[index + 1].id}`] : null;
+
+  return (
+    <div className="timeline-item">
+      <div ref={(element) => { draggableRef(element); droppableRef(element); }} className={`stoprow ${isDragSource ? "dragging" : ""} ${isDropTarget ? "drag-over" : ""}`} data-stop-id={stop.id}>
+        <input className="stop-time" aria-label={`Arrival time for ${stop.name}`} type="time" value={stop.t} onChange={(event) => updateTime(stop.id, event.target.value)} />
+        <div>
+          <div className={`stop card ${open[stop.id] ? "open" : ""}`}>
+            <div className="stop-top" onClick={() => setOpen((prev) => ({ ...prev, [stop.id]: !prev[stop.id] }))}>
+              <button ref={handleRef} className="drag-handle" aria-label={`Long press to drag ${stop.name}`} onClick={(event) => event.stopPropagation()}>⠿</button>
+              <span className="drag-hint">Long press to drag</span>
+              <div className="th"><img src={stop.img} alt={`${stop.name} in Lisbon`} /></div>
+              <div><div className="nm">{stop.name}</div><div className="ar">{stop.area}</div></div>
+              <button className="stop-menu-button" aria-label={`Edit ${stop.name}`} onClick={(event) => { event.stopPropagation(); setMenuId(menuId === stop.id ? null : stop.id); }}>•••</button>
+              <svg className="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
+            </div>
+            {menuId === stop.id && <div className="stop-menu" onClick={(event) => event.stopPropagation()}>
+              <button onClick={() => { setSheetAction({ type: "replace", stopId: stop.id }); setMenuId(null); }}>Replace</button>
+              <button disabled={index === 0} onClick={() => moveStop(stop.id, -1)}>Move earlier</button>
+              <button disabled={index === stops.length - 1} onClick={() => moveStop(stop.id, 1)}>Move later</button>
+              <button className="danger" onClick={() => removeStop(stop.id)}>Remove</button>
+            </div>}
+            <div className="exp">{stop.exp}</div>
+          </div>
+          <div className="stop-tags">{stop.tags.map((tag) => <span key={tag} className={`chip ${tagClass(tag)}`}>{tag}</span>)}</div>
+        </div>
+      </div>
+      {index < stops.length - 1 && <div className={`route-leg ${leg ? "" : "unavailable"}`}><WalkIcon />{leg ? <span>{leg.distance} · Walk {leg.duration}</span> : <span>Route details unavailable</span>}</div>}
+    </div>
+  );
+}
+
 export default function PlanScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { profile } = useAuth();
-  const userName = profile?.username || "Alice";
-  const { mode, setMode, likes, skips, markPlanSeen, hotel, flight, startDate, endDate } = useAppState;
+  const {
+    mode,
+    markPlanSeen,
+    hotel,
+    flight,
+    startDate,
+    endDate,
+    activeItinerary,
+    activeStops,
+    isItineraryDirty,
+    userSuggestedItineraries,
+    selectItinerary,
+    setItineraryStops,
+    discardItineraryDraft,
+    saveItinerarySnapshot,
+    deleteSuggestedItinerary,
+    restoreSuggestedItinerary,
+  } = useAppState;
   const [open, setOpen] = useState({});
+  const [menuId, setMenuId] = useState(null);
+  const [sheetAction, setSheetAction] = useState(null);
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [placeResults, setPlaceResults] = useState([]);
+  const [placeLoading, setPlaceLoading] = useState(false);
+  const [placeError, setPlaceError] = useState("");
+  const [timeError, setTimeError] = useState("");
+  const [undoStop, setUndoStop] = useState(null);
+  const [undoItinerary, setUndoItinerary] = useState(null);
+  const debounceRef = useRef(null);
 
   const planDay = useMemo(() => {
     if (startDate && endDate) {
       const s = new Date(startDate);
       const e = new Date(endDate);
-      const mid = new Date((s.getTime() + e.getTime()) / 2);
-      return mid;
+      return new Date((s.getTime() + e.getTime()) / 2);
     }
     return new Date(2025, 3, 25);
   }, [startDate, endDate]);
 
+  const baseMode = activeItinerary.baseMode || (PLAN[activeItinerary.id] ? activeItinerary.id : mode);
+  const plan = PLAN[baseMode] || PLAN.balanced;
+  const sat = SATISFACTION[baseMode] || SATISFACTION.balanced;
   const hotelPicked = HOTELS.find((h) => h.id === hotel);
   const flightPicked = FLIGHTS.find((f) => f.id === flight);
+  const itineraries = [
+    ...MODES.map((id) => ({ id, label: MODE_LABELS[id], kind: "default" })),
+    ...userSuggestedItineraries,
+  ];
 
   useEffect(() => {
     markPlanSeen();
   }, [markPlanSeen]);
 
-  const plan = PLAN[mode];
-  const sat = SATISFACTION[mode];
-  const aliceSat = Math.max(0, Math.min(97, 91 + Math.round((likes - skips) * 2)));
-  const ms = [
-    { name: userName, v: aliceSat },
-    { name: "Ben", v: 88 },
-    { name: "Priya", v: 79 },
-    { name: "Marcus", v: 78 },
-  ];
+  useEffect(() => {
+    if (!isItineraryDirty) return undefined;
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [isItineraryDirty]);
+
+  useEffect(() => {
+    if (!isItineraryDirty) return undefined;
+    const confirmLinkNavigation = (event) => {
+      const link = event.target.closest("a[href]");
+      if (!link || link.target || link.download || event.metaKey || event.ctrlKey) return;
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin || destination.pathname === window.location.pathname) return;
+      if (!window.confirm("Discard unsaved itinerary edits?")) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      discardItineraryDraft(activeItinerary.id);
+    };
+    document.addEventListener("click", confirmLinkNavigation, true);
+    return () => document.removeEventListener("click", confirmLinkNavigation, true);
+  }, [activeItinerary.id, discardItineraryDraft, isItineraryDirty]);
+
+  useEffect(() => {
+    if (!undoStop && !undoItinerary) return undefined;
+    const timeout = window.setTimeout(() => {
+      setUndoStop(null);
+      setUndoItinerary(null);
+    }, 5000);
+    return () => window.clearTimeout(timeout);
+  }, [undoStop, undoItinerary]);
+
+  const updateStops = (nextStops) => {
+    setItineraryStops(activeItinerary.id, nextStops);
+    if (timeError && isChronological(nextStops)) setTimeError("");
+  };
+
+  const requestItineraryChange = (id) => {
+    if (id === activeItinerary.id) return;
+    if (isItineraryDirty && !window.confirm("Discard unsaved itinerary edits?")) return;
+    if (isItineraryDirty) discardItineraryDraft(activeItinerary.id);
+    setOpen({});
+    setMenuId(null);
+    setTimeError("");
+    selectItinerary(id);
+  };
+
+  const saveSnapshot = () => {
+    if (!isChronological(activeStops)) {
+      setTimeError("Arrival times must be in chronological order before saving.");
+      return;
+    }
+    setTimeError("");
+    saveItinerarySnapshot(activeItinerary.id);
+  };
+
+  const navigateAway = (path) => {
+    if (isItineraryDirty && !window.confirm("Discard unsaved itinerary edits?")) return;
+    if (isItineraryDirty) discardItineraryDraft(activeItinerary.id);
+    navigate(path);
+  };
+
+  const handlePlaceSearch = (value) => {
+    setPlaceQuery(value);
+    setPlaceError("");
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    if (value.trim().length < 2) {
+      setPlaceResults([]);
+      return;
+    }
+    debounceRef.current = window.setTimeout(async () => {
+      setPlaceLoading(true);
+      try {
+        setPlaceResults(await searchPlaces(value));
+      } catch (err) {
+        setPlaceError(err.message || "Search failed");
+        setPlaceResults([]);
+      } finally {
+        setPlaceLoading(false);
+      }
+    }, 350);
+  };
+
+  const applyPlace = (place) => {
+    const replaced = sheetAction?.type === "replace";
+    const oldStop = activeStops.find((stop) => stop.id === sheetAction?.stopId);
+    const stop = {
+      id: `user-${place.placeId}-${activeStops.filter((item) => item.id.startsWith(`user-${place.placeId}-`)).length + 1}`,
+      t: replaced ? oldStop.t : nextStopTime(activeStops),
+      name: place.mainText,
+      area: place.secondaryText || "Custom location",
+      tags: ["User-added"],
+      img: place.mapImageUrl || "/images/hero-lisbon.jpg",
+      exp: place.description || "Added by you.",
+      userAdded: true,
+    };
+    if (replaced) {
+      updateStops(activeStops.map((item) => (item.id === oldStop.id ? stop : item)));
+    } else {
+      updateStops([...activeStops, stop]);
+    }
+    setSheetAction(null);
+    setPlaceQuery("");
+    setPlaceResults([]);
+  };
+
+  const removeStop = (id) => {
+    const index = activeStops.findIndex((stop) => stop.id === id);
+    if (index < 0) return;
+    setUndoStop({ stop: activeStops[index], index, itineraryId: activeItinerary.id });
+    updateStops(activeStops.filter((stop) => stop.id !== id));
+    setMenuId(null);
+  };
+
+  const moveStop = (id, direction) => {
+    const index = activeStops.findIndex((stop) => stop.id === id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= activeStops.length) return;
+    updateStops(reorderStops(activeStops, index, target));
+    setMenuId(null);
+  };
+
+  const finishDrag = (sourceId, targetId) => {
+    if (!sourceId || !targetId || sourceId === targetId) return;
+    const from = activeStops.findIndex((stop) => stop.id === sourceId);
+    const to = activeStops.findIndex((stop) => stop.id === targetId);
+    if (from >= 0 && to >= 0) {
+      updateStops(reorderStops(activeStops, from, to));
+    }
+  };
+
+  const updateTime = (id, t) => updateStops(activeStops.map((stop) => (stop.id === id ? { ...stop, t } : stop)));
+
+  const deleteItinerary = (itinerary) => {
+    const index = userSuggestedItineraries.findIndex((item) => item.id === itinerary.id);
+    deleteSuggestedItinerary(itinerary.id);
+    setUndoItinerary({ itinerary, index });
+  };
 
   return (
+    <section className="screen active">
+      <div className="plan-head">
+        <div className="eyebrow">{DAYS[planDay.getDay()]} · {MONTHS_SHORT[planDay.getMonth()]} {planDay.getDate()}</div>
+        <div className="day">The shared plan</div>
+      </div>
 
-      <section className="screen active">
-        <div className="plan-head">
-          <div className="eyebrow">{DAYS[planDay.getDay()]} · {MONTHS_SHORT[planDay.getMonth()]} {planDay.getDate()}</div>
-          <div className="day">The shared plan</div>
-        </div>
-
-        <div className="plan-cards">
-          <div className="sat bento-card">
-            <SatisfactionRing value={sat} />
-            <div className="info">
-              <h3>Group satisfaction</h3>
-              <p>Weighted across 4 profiles · driven by your tagged reasons.</p>
-              <div className="satcats">
-                <span className="chip tag-ok">Food · high</span>
-                <span className="chip">Culture · medium</span>
-                <span className="chip tag-off">Nightlife · low</span>
-              </div>
+      <div className="plan-cards">
+        <div className="sat bento-card">
+          <SatisfactionRing value={sat} />
+          <div className="info">
+            <h3>Group satisfaction</h3>
+            <p>Weighted across 4 profiles · driven by your tagged reasons.</p>
+            <div className="satcats">
+              <span className="chip tag-ok">Food · high</span>
+              <span className="chip">Culture · medium</span>
+              <span className="chip tag-off">Nightlife · low</span>
             </div>
-          </div>
-
-          <div className="bento-card">
-            <div className="bx-title">Trip basics · you're the leader</div>
-            <div className="tl-picks">
-              <div className="tl-pick">
-                <span className="lbl">Stay</span>
-                <span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span>
-              </div>
-              <div className="tl-pick">
-                <span className="lbl">Flight</span>
-                <span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span>
-              </div>
-            </div>
-            <button className="btn btn-primary btn-block" onClick={() => navigate("/travel")}>
-              Set stay &amp; flights →
-            </button>
-          </div>
-
-          <div className="whatif bento-card">
-            <div className="bx-title">What if we tried…</div>
-            <div className="seg">
-              {MODES.map((m) => (
-                <button key={m} className={mode === m ? "sel" : ""} onClick={() => setMode(m)}>
-                  {MODE_LABELS[m]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className={`delta ${plan.delta ? "show" : ""}`}>
-            <b>What changed:</b> <span dangerouslySetInnerHTML={{ __html: plan.delta }} />
           </div>
         </div>
 
+        <div className="bento-card">
+          <div className="bx-title">Trip basics · you're the leader</div>
+          <div className="tl-picks">
+            <div className="tl-pick"><span className="lbl">Stay</span><span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span></div>
+            <div className="tl-pick"><span className="lbl">Flight</span><span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span></div>
+          </div>
+          <button className="btn btn-primary btn-block" onClick={() => navigateAway("/travel")}>Set stay &amp; flights →</button>
+        </div>
+
+        <div className="whatif bento-card">
+          <div className="bx-title">Itineraries</div>
+          <div className="itinerary-tabs" role="tablist" aria-label="Itineraries">
+            {itineraries.map((itinerary) => (
+              <div className="itinerary-tab-wrap" key={itinerary.id}>
+                <button role="tab" aria-selected={activeItinerary.id === itinerary.id} className={`itinerary-tab ${activeItinerary.id === itinerary.id ? "sel" : ""}`} onClick={() => requestItineraryChange(itinerary.id)}>{itinerary.label}</button>
+                {itinerary.kind === "suggested" && <button className="itinerary-delete" aria-label={`Delete ${itinerary.label}`} onClick={() => deleteItinerary(itinerary)}>×</button>}
+              </div>
+            ))}
+          </div>
+          <button className="btn btn-primary btn-block plan-save" onClick={saveSnapshot}>Save as user-suggested</button>
+          {isItineraryDirty && <span className="plan-draft">Unsaved edits</span>}
+          {timeError && <div className="plan-error" role="alert">{timeError}</div>}
+        </div>
+
+        <div className={`delta ${plan.delta ? "show" : ""}`}><b>What changed:</b> <span dangerouslySetInnerHTML={{ __html: plan.delta }} /></div>
+      </div>
+
+      <DragDropProvider sensors={DND_SENSORS} onDragEnd={(event) => {
+        if (event.canceled) return;
+        const targetId = String(event.operation.target?.id || "").replace("drop:", "");
+        finishDrag(event.operation.source?.id, targetId);
+      }}>
         <div className="timeline">
-          {plan.stops.map((s) => (
-            <div key={s.t + s.id} className="stoprow">
-              <span className="t">{s.t}</span>
-              <div>
-                <div className={`stop card ${open[s.id] ? "open" : ""}`}>
-                  <div className="stop-top" onClick={() => setOpen((prev) => ({ ...prev, [s.id]: !prev[s.id] }))}>
-                    <div className="th">
-                      <img src={s.img} alt={`${s.name} in Lisbon`} />
-                    </div>
-                    <div>
-                      <div className="nm">{s.name}</div>
-                      <div className="ar">{s.area}</div>
-                    </div>
-                    <svg className="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </div>
-                  <div className="exp">{s.exp}</div>
-                </div>
-                <div className="stop-tags">
-                  {s.tags.map((t) => (
-                    <span key={t} className={`chip ${tagClass(t)}`}>{t}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+          {activeStops.map((stop, index) => <DroppableStop key={stop.id} stop={stop} index={index} stops={activeStops} open={open} menuId={menuId} setOpen={setOpen} setMenuId={setMenuId} setSheetAction={setSheetAction} moveStop={moveStop} removeStop={removeStop} updateTime={updateTime} />)}
+          <button className="btn btn-secondary plan-add-stop" onClick={() => setSheetAction({ type: "add" })}>+ Add stop</button>
         </div>
+        <DragOverlay>{(source) => {
+          const stop = activeStops.find((item) => item.id === source.id);
+          return stop ? <DragPreview stop={stop} /> : null;
+        }}</DragOverlay>
+      </DragDropProvider>
 
-        <div className="why-head">
-          <h3>Why this way?</h3>
-        </div>
-        <details className="why-note" style={{ margin: "10px 20px 6px" }}>
-          <summary>Negotiation notes</summary>
-          <div className="bullets">
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {plan.why.map((w, i) => (
-                <li key={i} style={{ marginBottom: 8 }} dangerouslySetInnerHTML={{ __html: w }} />
-              ))}
-            </ul>
-          </div>
-        </details>
+      <div className="why-head"><h3>Why this way?</h3></div>
+      <details className="why-note" style={{ margin: "10px 20px 6px" }}><summary>Negotiation notes</summary><div className="bullets"><ul style={{ margin: 0, paddingLeft: 18 }}>{plan.why.map((why, index) => <li key={index} style={{ marginBottom: 8 }} dangerouslySetInnerHTML={{ __html: why }} />)}</ul></div></details>
 
-        <div className="why-head">
-          <h3>Group mood</h3>
-        </div>
-        <div className="member-sat plan-tail" style={{ padding: "6px 20px 30px" }}>
-          {ms.map((m) => (
-            <div key={m.name} className="msrow">
-              <div className="top">
-                <b>{m.name}</b>
-                <span className="v">{m.v}/100</span>
-              </div>
-              <div className="bar">
-                <i style={{ width: `${m.v}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <BottomSheet open={Boolean(sheetAction)} onClose={() => setSheetAction(null)}>
+        <h3>{sheetAction?.type === "replace" ? "Replace stop" : "Add a stop"}</h3>
+        <p className="sub">Search Google Places. Added stops are labelled as user-added rather than receiving generated consensus claims.</p>
+        <input className="addplace-input" autoFocus placeholder="Search places..." value={placeQuery} onChange={(event) => handlePlaceSearch(event.target.value)} />
+        {placeError && <div className="addplace-error">{placeError}</div>}
+        {placeLoading && <div className="addplace-status">Searching...</div>}
+        {!placeLoading && placeResults.length > 0 && <div className="addplace-results">{placeResults.map((place) => <button key={place.placeId} className="addplace-result" onClick={() => applyPlace(place)}><span className="apr-main">{place.mainText}</span><span className="apr-sub">{place.secondaryText}</span></button>)}</div>}
+        {!placeLoading && placeResults.length === 0 && placeQuery.length >= 2 && !placeError && <div className="addplace-status">No results found</div>}
+      </BottomSheet>
+
+      {(undoStop || undoItinerary) && <div className="plan-undo" role="status"><span>{undoStop ? `${undoStop.stop.name} removed` : `${undoItinerary.itinerary.label} deleted`}</span><button onClick={() => {
+        if (undoStop && undoStop.itineraryId === activeItinerary.id) {
+          const next = [...activeStops];
+          next.splice(undoStop.index, 0, undoStop.stop);
+          updateStops(next);
+        }
+        if (undoItinerary) restoreSuggestedItinerary(undoItinerary.itinerary, undoItinerary.index);
+        setUndoStop(null);
+        setUndoItinerary(null);
+      }}>Undo</button></div>}
+    </section>
   );
 }

@@ -65,3 +65,17 @@ export const PLAN = {
     ],
   },
 };
+
+// These are intentionally only the route legs the static plans know about.
+// Edited pairings remain visibly unresolved until routing is introduced.
+export const ROUTE_LEGS = {
+  "lxfactory:timeout": { distance: "3.4 km", duration: "18 min" },
+  "timeout:gulbenkian": { distance: "3.2 km", duration: "14 min" },
+  "gulbenkian:miradouro": { distance: "4.1 km", duration: "22 min" },
+  "gulbenkian:natam": { distance: "3.1 km", duration: "16 min" },
+  "natam:miradouro": { distance: "1.8 km", duration: "11 min" },
+  "miradouro:alfama": { distance: "550 m", duration: "8 min" },
+  "miradouro:estrela": { distance: "3.8 km", duration: "21 min" },
+  "estrela:alfama": { distance: "3.7 km", duration: "20 min" },
+  "alfama:park": { distance: "1.5 km", duration: "12 min" },
+};

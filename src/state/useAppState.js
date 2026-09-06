@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { CARD_DATA } from "../data/cards";
+import { PLAN } from "../data/plans";
 
 const LS_KEY = "tripder-state-v1";
 
@@ -20,7 +21,26 @@ const DEFAULT_STATE = {
   flight: null,
   carRental: null,
   styleName: "",
+  activeItineraryId: "balanced",
+  itineraryDrafts: {},
+  userSuggestedItineraries: [],
+  nextSuggestedNumber: 1,
 };
+
+function isDefaultItinerary(id) {
+  return Boolean(PLAN[id]);
+}
+
+function getItinerary(state, id) {
+  if (isDefaultItinerary(id)) {
+    return { id, label: id, stops: PLAN[id].stops, kind: "default" };
+  }
+  return state.userSuggestedItineraries.find((itinerary) => itinerary.id === id) || null;
+}
+
+function getStops(state, id) {
+  return state.itineraryDrafts[id]?.stops || getItinerary(state, id)?.stops || [];
+}
 
 function load() {
   try {
@@ -78,7 +98,97 @@ export function useAppState() {
 
   const setMode = useCallback((mode) => {
     setState((prev) => {
-      const next = { ...prev, mode };
+      const next = { ...prev, mode, activeItineraryId: mode };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const selectItinerary = useCallback((id) => {
+    setState((prev) => {
+      if (!getItinerary(prev, id)) return prev;
+      const next = { ...prev, activeItineraryId: id, mode: isDefaultItinerary(id) ? id : prev.mode };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const setItineraryStops = useCallback((id, stops) => {
+    setState((prev) => {
+      if (!getItinerary(prev, id)) return prev;
+      const next = {
+        ...prev,
+        itineraryDrafts: { ...prev.itineraryDrafts, [id]: { stops } },
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const discardItineraryDraft = useCallback((id) => {
+    setState((prev) => {
+      if (!prev.itineraryDrafts[id]) return prev;
+      const { [id]: _, ...itineraryDrafts } = prev.itineraryDrafts;
+      const next = { ...prev, itineraryDrafts };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const saveItinerarySnapshot = useCallback((id) => {
+    setState((prev) => {
+      const source = getItinerary(prev, id);
+      if (!source) return prev;
+      const number = prev.nextSuggestedNumber;
+      const itinerary = {
+        id: `user-suggested-${number}`,
+        label: `User-suggested ${number}`,
+        kind: "suggested",
+        sourceId: id,
+        baseMode: isDefaultItinerary(id) ? id : source.baseMode || "balanced",
+        stops: getStops(prev, id),
+      };
+      const { [id]: _, ...itineraryDrafts } = prev.itineraryDrafts;
+      const next = {
+        ...prev,
+        activeItineraryId: itinerary.id,
+        itineraryDrafts,
+        userSuggestedItineraries: [...prev.userSuggestedItineraries, itinerary],
+        nextSuggestedNumber: number + 1,
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const deleteSuggestedItinerary = useCallback((id) => {
+    setState((prev) => {
+      const index = prev.userSuggestedItineraries.findIndex((itinerary) => itinerary.id === id);
+      if (index < 0) return prev;
+      const { [id]: _, ...itineraryDrafts } = prev.itineraryDrafts;
+      const userSuggestedItineraries = prev.userSuggestedItineraries.filter((itinerary) => itinerary.id !== id);
+      const previous = prev.userSuggestedItineraries[index - 1];
+      const next = {
+        ...prev,
+        itineraryDrafts,
+        userSuggestedItineraries,
+        activeItineraryId: prev.activeItineraryId === id ? previous?.id || "balanced" : prev.activeItineraryId,
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const restoreSuggestedItinerary = useCallback((itinerary, index) => {
+    setState((prev) => {
+      if (prev.userSuggestedItineraries.some((item) => item.id === itinerary.id)) return prev;
+      const userSuggestedItineraries = [...prev.userSuggestedItineraries];
+      userSuggestedItineraries.splice(index, 0, itinerary);
+      const next = {
+        ...prev,
+        userSuggestedItineraries,
+        activeItineraryId: itinerary.id,
+      };
       save(next);
       return next;
     });
@@ -163,16 +273,34 @@ export function useAppState() {
     [state.tagged],
   );
   const finished = state.idx >= allCards.length;
+  const activeItinerary = useMemo(
+    () => getItinerary(state, state.activeItineraryId) || getItinerary(state, "balanced"),
+    [state],
+  );
+  const activeStops = useMemo(
+    () => getStops(state, activeItinerary.id),
+    [state, activeItinerary],
+  );
+  const isItineraryDirty = Boolean(state.itineraryDrafts[activeItinerary.id]);
 
   return {
     ...state,
     allCards,
     finished,
     reasonCount,
+    activeItinerary,
+    activeStops,
+    isItineraryDirty,
     update,
     swipeCard,
     saveReason,
     setMode,
+    selectItinerary,
+    setItineraryStops,
+    discardItineraryDraft,
+    saveItinerarySnapshot,
+    deleteSuggestedItinerary,
+    restoreSuggestedItinerary,
     selectHotel,
     selectFlight,
     selectCarRental,
