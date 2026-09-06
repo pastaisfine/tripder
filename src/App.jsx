@@ -66,7 +66,7 @@ function Shell() {
     "/reset-password": <ResetPasswordScreen />,
   };
 
-  return <AuthProvider><div className="stage"><div className="device"><BrowserRouter><Routes>{Object.entries(CHROME).map(([path, cfg]) => <Route key={path} path={path} element={<div className="app">{cfg.header && <AppHeader invert={cfg.invert} trip={cfg.trip || trip} back={cfg.back} backLabel={cfg.backLabel} theme={theme} toggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />}{screens[path]}{cfg.tabs && <TabBar active={cfg.active} />}</div>} />)}</Routes></BrowserRouter></div></div></AuthProvider>;
+  return <AuthProvider><div className="stage"><div className="device"><BrowserRouter><Routes>{Object.entries(CHROME).map(([path, cfg]) => <Route key={path} path={path} element={<div className={`app${cfg.tabs ? " app--sidebar" : ""}`}>{cfg.header && <AppHeader invert={cfg.invert} trip={cfg.trip || trip} back={cfg.back} backLabel={cfg.backLabel} theme={theme} toggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />}{screens[path]}{cfg.tabs && <TabBar active={cfg.active} />}</div>} />)}</Routes></BrowserRouter></div></div></AuthProvider>;
 }
 
 export default Shell;

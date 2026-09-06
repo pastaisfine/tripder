@@ -47,7 +47,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-bottom: calc(var(--bar) + 12px);
+  padding-bottom: 12px;
 }
 
 /* ─── app header ── */
@@ -154,83 +154,38 @@
   border-color: rgba(255, 255, 255, .5);
 }
 
-/* ─── tab bar ── */
+/* ─── persistent sidebar navigation ── */
 .tabbar {
   position: absolute;
-  bottom: 0;
   left: 0;
-  right: 0;
+  top: var(--sb);
+  bottom: 0;
   z-index: 50;
-  height: var(--bar);
-  background: rgba(255, 253, 250, 0.92);
+  width: var(--sidebar-width);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border-right: 1px solid var(--border);
   backdrop-filter: saturate(180%) blur(18px);
   -webkit-backdrop-filter: saturate(180%) blur(18px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: stretch;
-  padding: 6px 8px 10px;
+  padding: 12px 8px;
 }
 
-.tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: 10px;
-  color: var(--nav-ink);
-  border: 0;
-  background: none;
-  border-radius: 14px;
-  min-height: 44px;
-  text-decoration: none;
-  position: relative;
-  letter-spacing: .01em;
-  transition: color .16s ease;
+.app--sidebar .screen {
+  left: var(--sidebar-width);
 }
 
-.tab svg {
-  width: 21px;
-  height: 21px;
-  stroke: var(--nav-ink);
-  transition: stroke .16s ease, transform .16s ease;
-}
-
-.tab:hover {
-  color: var(--fg);
-}
-
-.tab:hover svg {
-  stroke: var(--fg);
-}
-
-.tab.active {
-  color: var(--accent-ink);
-  font-weight: 700;
-}
-
-.tab.active svg {
-  stroke: var(--accent);
-  stroke-width: 2.1;
-  transform: translateY(-1px);
-}
-
-/* soft coral halo behind the selected icon */
-.tab.active::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  width: 40px;
-  height: 26px;
-  border-radius: var(--r-pill);
-  background: var(--accent-soft);
+.tabbar .line-sidebar {
+  min-width: max-content;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: .02em;
 }
 
 /* ─── desktop layout ── */
 @media (min-width: 900px) {
   :root {
     --shell: 1080px;
+    --sidebar-width: 190px;
   }
 
   .appheader {
@@ -254,47 +209,19 @@
   }
 
   .tabbar {
-    top: 56px;
-    bottom: auto;
-    left: 0;
-    right: 0;
-    height: auto;
-    border-top: 0;
-    border-bottom: 1px solid var(--border);
-    padding: 6px 32px;
-    justify-content: flex-start;
-    gap: 6px;
+    padding: 18px 16px;
+    width: var(--sidebar-width);
   }
 
-  .tab {
-    flex: none;
-    flex-direction: row;
-    gap: 7px;
-    min-height: 42px;
-    padding: 0 16px;
-    font-size: 13px;
-    border-radius: var(--r-pill);
-  }
-
-  .tab svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .tab.active {
-    background: var(--accent-soft);
-  }
-
-  .tab.active::before {
-    display: none;
-  }
-
-  .tab.active svg {
-    transform: none;
+  .tabbar .line-sidebar {
+    --font-size: .95rem !important;
+    --item-gap: 22px !important;
+    --marker-length: 48px !important;
+    --max-shift: 24px !important;
   }
 
   .app {
-    --sb: 104px;
+    --sb: 56px;
   }
 
   .screen {
@@ -1032,7 +959,7 @@
 
 /* ─── travel ── */
 .screen-travel {
-  padding: calc(var(--sb) + 18px) 20px calc(var(--bar) + 18px);
+  padding: calc(var(--sb) + 18px) 20px 18px;
 }
 
 .travel-head {
@@ -1246,7 +1173,7 @@
 }
 
 .hub-body {
-  padding: 0 20px calc(var(--bar) + 8px);
+  padding: 0 20px 8px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1358,7 +1285,7 @@
   }
 
   .hub-hero {
-    margin-top: 104px;
+    margin-top: 56px;
     border-radius: 0 0 26px 26px;
   }
 
@@ -1375,7 +1302,7 @@
   }
 
   .hub-body {
-    padding: 0 32px calc(var(--bar) + 8px);
+    padding: 0 32px 8px;
   }
 
   @media (min-width: 1120px) {
@@ -1424,7 +1351,7 @@
 
 .deck-zone.empty {
   flex: 0 0 auto;
-  margin: 28px 20px calc(var(--bar) + 28px);
+  margin: 28px 20px;
 }
 
 .deck-zone.empty .sw-empty {
@@ -1573,7 +1500,7 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-  padding: 12px 20px calc(var(--bar) + 16px);
+  padding: 12px 20px 16px;
 }
 
 .sw-btn {
@@ -2287,7 +2214,7 @@
 
 /* clear the fixed tab bar on the plan screen's trailing content */
 .member-sat.plan-tail {
-  padding-bottom: calc(var(--bar) + 28px) !important;
+  padding-bottom: 28px !important;
 }
 
 @media (min-width: 900px) {
@@ -2523,7 +2450,7 @@
 
 /* ─── group ── */
 .group-body {
-  padding: calc(var(--sb) + 18px) 20px calc(var(--bar) + 14px);
+  padding: calc(var(--sb) + 18px) 20px 14px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -2794,6 +2721,10 @@
     border-radius: 0;
     box-shadow: none;
   }
+
+  .memberlist {
+    flex-wrap: wrap;
+  }
 }
 
 /* ─── Dark Mode Overrides ─── */
@@ -2857,10 +2788,14 @@
 
 .spiral-backdrop {
   position: fixed;
-  inset: var(--sb) 0 var(--bar);
+  inset: var(--sb) 0 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.app--sidebar .spiral-backdrop {
+  left: var(--sidebar-width);
 }
 
 .spiral-backdrop::after {
@@ -3038,41 +2973,6 @@ button.btn-primary,
   color: #FFFDFA !important;
 }
 
-/* ─── Fix TabBar Navigation in Dark Mode ─── */
-.tabbar,
-.tab-bar,
-nav.tabbar,
-nav.tab-bar {
-  background-color: var(--surface) !important;
-  border-bottom: 1px solid var(--border) !important;
-  transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-
-[data-theme="dark"] .tabbar,
-[data-theme="dark"] .tab-bar,
-[data-theme="dark"] nav.tabbar,
-[data-theme="dark"] nav.tab-bar {
-  background-color: #1C1924 !important;
-  border-color: #2D2838 !important;
-}
-
-/* Fix text and inactive tab icon colors in Dark Mode */
-[data-theme="dark"] .tabbar a,
-[data-theme="dark"] .tabbar button,
-[data-theme="dark"] .tab-bar a,
-[data-theme="dark"] .tab-bar button {
-  color: #9B93A8 !important;
-}
-
-/* Active Tab indicator styling in Dark Mode */
-[data-theme="dark"] .tabbar .active,
-[data-theme="dark"] .tab-bar .active,
-[data-theme="dark"] .tabbar a.active,
-[data-theme="dark"] .tab-bar a.active {
-  background-color: rgba(238, 127, 101, 0.22) !important;
-  color: #FF9E87 !important;
-}
-
 /* ─── Lock Splash / Landing Page (`/`) to Original Light Colors ─── */
 [data-theme="dark"] .splash,
 [data-theme="dark"] .screen-splash,
@@ -3157,6 +3057,6 @@ nav.tab-bar {
 .route-leg svg { width: 15px; height: 15px; color: var(--gerund); flex: none; }
 .route-leg.unavailable, .route-leg.unavailable svg { color: #B9754A; }
 .plan-add-stop { width: 100%; margin-top: 4px; border-style: dashed; }
-.plan-undo { position: fixed; left: 20px; right: 20px; bottom: calc(var(--bar) + 14px); z-index: 60; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--fg); color: #fff; box-shadow: var(--shadow-lift); font-size: 12.5px; }
+.plan-undo { position: fixed; left: 20px; right: 20px; bottom: 14px; z-index: 60; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--fg); color: #fff; box-shadow: var(--shadow-lift); font-size: 12.5px; }
 .plan-undo button { border: 0; border-radius: 8px; padding: 6px 9px; background: var(--accent); color: #fff; cursor: pointer; font-weight: 700; }
 @media (min-width: 900px) { .route-leg { margin-left: 68px; } .plan-undo { left: 50%; right: auto; bottom: 24px; width: min(440px, calc(100% - 64px)); transform: translateX(-50%); } }
