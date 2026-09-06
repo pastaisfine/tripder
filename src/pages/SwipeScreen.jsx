@@ -1,8 +1,9 @@
-import { useState, useReducer, useRef, useCallback } from "react";
+import { useState, useReducer, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import SwipeCard from "../components/SwipeCard";
 import BottomSheet from "../components/BottomSheet";
 import ReasonChips from "../components/ReasonChips";
+import InfiniteSpiral from "../components/InfiniteSpiral";
 import { searchPlaces } from "../services/placesAutocomplete";
 
 const initialSheets = { reason: false, detail: false, addPlace: false, more: false };
@@ -61,6 +62,10 @@ export default function SwipeScreen({ useAppState }) {
 
   const remaining = allCards.slice(idx);
   const total = allCards.length;
+  const spiralItems = useMemo(
+    () => allCards.map((card) => ({ id: card.id, src: card.img, alt: card.name })),
+    [allCards],
+  );
 
   const handleVerdict = (dir) => {
     const card = allCards[idx];
@@ -138,7 +143,27 @@ export default function SwipeScreen({ useAppState }) {
   };
 
 return (
-      <section className="screen active">
+      <section className="screen active spiral-screen spiral-screen--swipe">
+        <div className="spiral-backdrop" aria-hidden="true">
+          <InfiniteSpiral
+            items={spiralItems}
+            speed={0.12}
+            direction="down"
+            radius={250}
+            cardWidth={178}
+            cardHeight={238}
+            verticalSpacing={126}
+            cardsPerTurn={7}
+            rotation={-22}
+            cardTilt={5}
+            cardRadius={24}
+            centerScale={1.03}
+            edgeFade={0.2}
+            edgeBlur={10}
+            grayscale={0.48}
+            pauseOnHover={false}
+          />
+        </div>
         <div className="swipe-head">
           <div>
             <div className="eyebrow">Swipe for you</div>

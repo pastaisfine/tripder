@@ -1,21 +1,46 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { MEMBERS } from "../data/members";
 import ProgressBar from "../components/ProgressBar";
+import InfiniteSpiral from "../components/InfiniteSpiral";
 import { fmtDateRange, dayCount } from "../utils/date";
 
 export default function HubScreen({ useAppState }) {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate } = useAppState;
+  const { likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate, activeStops } = useAppState;
 
   const mineDone = likes + skips > 0;
   const doneCount = 3 + (mineDone ? 1 : 0);
   const dateRange = fmtDateRange(startDate, endDate);
   const days = startDate && endDate ? dayCount(startDate, endDate) : 3;
+  const spiralItems = useMemo(
+    () => activeStops.map((stop) => ({ id: stop.id, src: stop.img, alt: stop.name })),
+    [activeStops],
+  );
 
   return (
-    <section className="screen active">
+    <section className="screen active spiral-screen spiral-screen--hub">
+      <div className="spiral-backdrop" aria-hidden="true">
+        <InfiniteSpiral
+          items={spiralItems}
+          speed={0.11}
+          radius={270}
+          cardWidth={182}
+          cardHeight={124}
+          verticalSpacing={100}
+          cardsPerTurn={6}
+          rotation={-12}
+          cardTilt={4}
+          cardRadius={20}
+          centerScale={1.04}
+          edgeFade={0.2}
+          edgeBlur={9}
+          grayscale={0.38}
+          pauseOnHover={false}
+        />
+      </div>
         <div className="hub-hero">
           <div className="scrim-top" />
           <img src="/images/lisbon-rooftops.jpg" alt="Lisbon" />

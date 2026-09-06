@@ -7,6 +7,7 @@ import { SATISFACTION } from "../data/styles";
 import { HOTELS, FLIGHTS } from "../data/travel";
 import SatisfactionRing from "../components/SatisfactionRing";
 import BottomSheet from "../components/BottomSheet";
+import InfiniteSpiral from "../components/InfiniteSpiral";
 import { searchPlaces } from "../services/placesAutocomplete";
 
 const MODES = ["balanced", "foodfirst", "slower"];
@@ -152,6 +153,10 @@ export default function PlanScreen({ useAppState }) {
     ...MODES.map((id) => ({ id, label: MODE_LABELS[id], kind: "default" })),
     ...userSuggestedItineraries,
   ];
+  const spiralItems = useMemo(
+    () => activeStops.map((stop) => ({ id: stop.id, src: stop.img, alt: stop.name })),
+    [activeStops],
+  );
 
   useEffect(() => {
     markPlanSeen();
@@ -302,7 +307,26 @@ export default function PlanScreen({ useAppState }) {
   };
 
   return (
-    <section className="screen active">
+    <section className="screen active spiral-screen spiral-screen--plan">
+      <div className="spiral-backdrop" aria-hidden="true">
+        <InfiniteSpiral
+          items={spiralItems}
+          speed={0.16}
+          radius={235}
+          cardWidth={168}
+          cardHeight={116}
+          verticalSpacing={92}
+          cardsPerTurn={6}
+          rotation={18}
+          cardTilt={-4}
+          cardRadius={18}
+          centerScale={1.05}
+          edgeFade={0.18}
+          edgeBlur={8}
+          grayscale={0.32}
+          pauseOnHover={false}
+        />
+      </div>
       <div className="plan-head">
         <div className="eyebrow">{DAYS[planDay.getDay()]} · {MONTHS_SHORT[planDay.getMonth()]} {planDay.getDate()}</div>
         <div className="day">The shared plan</div>

@@ -2841,6 +2841,104 @@
   --ink: #F3EFF9;
 }
 
+/* ─── ambient itinerary spiral ─── */
+.spiral-screen {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(251, 217, 190, .44), transparent 34%),
+    radial-gradient(circle at 8% 86%, rgba(200, 182, 226, .28), transparent 38%),
+    var(--bg);
+}
+
+.spiral-screen > :not(.spiral-backdrop) {
+  position: relative;
+  z-index: 1;
+}
+
+.spiral-backdrop {
+  position: fixed;
+  inset: var(--sb) 0 var(--bar);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.spiral-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(251, 247, 240, .84) 0%, rgba(251, 247, 240, .68) 45%, rgba(251, 247, 240, .9) 100%),
+    radial-gradient(circle at 50% 50%, transparent 0 24%, rgba(251, 247, 240, .26) 70%);
+}
+
+.spiral-backdrop .infinite-spiral {
+  min-height: 0;
+  opacity: .76;
+  --infinite-spiral-card-border: rgba(255, 253, 250, .62);
+  --infinite-spiral-card-background: rgba(255, 253, 250, .16);
+  --infinite-spiral-card-shadow: 0 22px 48px -18px rgba(106, 71, 58, .38);
+}
+
+.spiral-screen--swipe .spiral-backdrop .infinite-spiral {
+  opacity: .6;
+}
+
+.spiral-screen--style .spiral-backdrop::after {
+  background:
+    linear-gradient(150deg, rgba(255, 241, 228, .86), rgba(253, 228, 224, .65) 48%, rgba(240, 228, 246, .86)),
+    radial-gradient(circle at 50% 50%, transparent 0 25%, rgba(251, 247, 240, .18) 72%);
+}
+
+.spiral-screen--hub .spiral-backdrop::after {
+  background:
+    linear-gradient(180deg, rgba(251, 247, 240, .74), rgba(251, 247, 240, .9)),
+    radial-gradient(circle at 75% 28%, rgba(95, 185, 155, .12), transparent 38%);
+}
+
+[data-theme="dark"] .spiral-screen {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(101, 64, 92, .34), transparent 34%),
+    radial-gradient(circle at 8% 86%, rgba(55, 76, 103, .26), transparent 38%),
+    var(--bg);
+}
+
+[data-theme="dark"] .spiral-backdrop::after {
+  background:
+    linear-gradient(180deg, rgba(18, 16, 22, .74) 0%, rgba(18, 16, 22, .64) 45%, rgba(18, 16, 22, .88) 100%),
+    radial-gradient(circle at 50% 50%, transparent 0 23%, rgba(18, 16, 22, .34) 74%);
+}
+
+[data-theme="dark"] .spiral-backdrop .infinite-spiral {
+  opacity: .54;
+  --infinite-spiral-card-border: rgba(243, 239, 249, .18);
+  --infinite-spiral-card-background: rgba(28, 25, 36, .28);
+  --infinite-spiral-card-shadow: 0 24px 50px -18px rgba(0, 0, 0, .72);
+}
+
+[data-theme="dark"] .spiral-screen--swipe .spiral-backdrop .infinite-spiral {
+  opacity: .42;
+}
+
+[data-theme="dark"] .spiral-screen--style .spiral-backdrop::after {
+  background:
+    linear-gradient(150deg, rgba(39, 27, 39, .8), rgba(34, 25, 42, .66) 50%, rgba(27, 22, 39, .88)),
+    radial-gradient(circle at 50% 50%, transparent 0 24%, rgba(18, 16, 22, .32) 74%);
+}
+
+[data-theme="dark"] .spiral-screen--hub .spiral-backdrop::after {
+  background:
+    linear-gradient(180deg, rgba(18, 16, 22, .68), rgba(18, 16, 22, .9)),
+    radial-gradient(circle at 75% 28%, rgba(107, 212, 177, .12), transparent 38%);
+}
+
+@media (min-width: 900px) {
+  .spiral-backdrop {
+    inset: var(--sb) 0 0;
+  }
+}
+
 /* ─── AppHeader Theme Fix ─── */
 .appheader {
   display: flex;
