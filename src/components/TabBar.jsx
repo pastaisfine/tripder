@@ -5,6 +5,7 @@ const TABS = [
   { to: "/hub", label: "Trip" },
   { to: "/swipe", label: "Swipe" },
   { to: "/plan", label: "Plan" },
+  { to: "/tasks", label: "Tasks" },
   { to: "/group", label: "Group" },
   { to: "/profile", label: "Profile" },
 ];

@@ -21,3 +21,4 @@ export async function searchPlaces(query) {
   const data = await res.json();
   return data.predictions || [];
 }
+

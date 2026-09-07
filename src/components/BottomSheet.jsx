@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export default function BottomSheet({ open, onClose, children, className = "" }) {
-  return (
+  const content = (
     <AnimatePresence>
       {open && (
         <>
@@ -26,4 +27,6 @@ export default function BottomSheet({ open, onClose, children, className = "" })
       )}
     </AnimatePresence>
   );
+
+  return createPortal(content, document.body);
 }

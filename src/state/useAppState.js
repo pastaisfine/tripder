@@ -26,6 +26,7 @@ const DEFAULT_STATE = {
   userSuggestedItineraries: [],
   nextSuggestedNumber: 1,
   preferenceProfiles: {},
+  tasks: [],
 };
 
 function isDefaultItinerary(id) {
@@ -280,6 +281,57 @@ export function useAppState() {
     });
   }, []);
 
+  const addTasks = useCallback((taskArray, createdBy) => {
+    setState((prev) => {
+      const newTasks = taskArray.map((t) => ({
+        id: crypto.randomUUID(),
+        title: String(t.title).trim(),
+        description: t.description ? String(t.description).trim() : "",
+        status: "open",
+        assignedTo: null,
+        createdBy: createdBy || "Someone",
+        createdAt: new Date().toISOString(),
+      }));
+      const next = { ...prev, tasks: [...prev.tasks, ...newTasks] };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const acceptTask = useCallback((taskId, userName) => {
+    setState((prev) => {
+      const next = {
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId ? { ...t, status: "assigned", assignedTo: userName } : t
+        ),
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const completeTask = useCallback((taskId) => {
+    setState((prev) => {
+      const next = {
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId ? { ...t, status: "done" } : t
+        ),
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const removeTask = useCallback((taskId) => {
+    setState((prev) => {
+      const next = { ...prev, tasks: prev.tasks.filter((t) => t.id !== taskId) };
+      save(next);
+      return next;
+    });
+  }, []);
+
   const allCards = useMemo(() => [...CARD_DATA, ...state.addedCards], [state.addedCards]);
 
   const reasonCount = useMemo(
@@ -325,5 +377,9 @@ export function useAppState() {
     markPlanSeen,
     appendCard,
     savePreferenceProfile,
+    addTasks,
+    acceptTask,
+    completeTask,
+    removeTask,
   };
 }
