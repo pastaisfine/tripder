@@ -33,54 +33,54 @@ export default function TravelScreen({ useAppState }) {
   );
 
   const carRow = (item) => (
-  <div
-    key={item.id}
-    className={`tlrow ${carRental === item.id ? "sel" : ""}`}
-    onClick={() => selectCarRental(item.id)}
-  >
     <div
-      className="tl-thumb"
-      style={{ backgroundImage: `url('${item.img}')` }}
-    />
-    <div className="tl-main">
-      <div className="tl-name">{item.name}</div>
-      <div className="tl-sub">{item.type}</div>
+      key={item.id}
+      className={`tlrow ${carRental === item.id ? "sel" : ""}`}
+      onClick={() => selectCarRental(item.id)}
+    >
+      <div
+        className="tl-thumb"
+        style={{ backgroundImage: `url('${item.img}')` }}
+      />
+      <div className="tl-main">
+        <div className="tl-name">{item.name}</div>
+        <div className="tl-sub">{item.type}</div>
+      </div>
+      <div className="tl-tail">
+        <div className="tl-price">{item.price}</div>
+      </div>
+      <span className="tl-check">✓</span>
     </div>
-    <div className="tl-tail">
-      <div className="tl-price">{item.price}</div>
-    </div>
-        <span className="tl-check">✓</span>
-  </div>
   );
 
   return (
 
-      <section className="screen active screen-travel">
-        <div className="travel-head">
-          <h1 className="h-display" style={{ fontSize: 27 }}>Trip basics</h1>
-          <div className="eyebrow" style={{ marginTop: 4 }}>As the leader, pick the stay &amp; the flight.</div>
-        </div>
+    <section className="screen active screen-travel">
+      <div className="travel-head">
+        <h1 className="h-display" style={{ fontSize: 27 }}>Trip basics</h1>
+        <div className="eyebrow" style={{ marginTop: 4 }}>As the leader, pick the stay &amp; the flight.</div>
+      </div>
 
-        <div className="travel-flow">
-          <div>
-            <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
-              <div className="travel-sec-head" style={{ marginTop: 0 }}>
-                <h2>Where you'll stay</h2>
-                <span className="eyebrow">{hotelPicked ? hotelPicked.name : "none picked"}</span>
-              </div>
-              <div className="tllist">{hotels.map((h) => row(h, "hotels"))}</div>
+      <div className="travel-flow">
+        <div>
+          <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
+            <div className="travel-sec-head" style={{ marginTop: 0 }}>
+              <h2>Where you'll stay</h2>
+              <span className="eyebrow">{hotelPicked ? hotelPicked.name : "none picked"}</span>
             </div>
+            <div className="tllist">{hotels.map((h) => row(h, "hotels"))}</div>
           </div>
-          <div>
-            <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
-              <div className="travel-sec-head" style={{ marginTop: 0 }}>
-                <h2>Getting there</h2>
-                <span className="eyebrow">{flightPicked ? flightPicked.name : "none picked"}</span>
-              </div>
-              <div className="tllist">{flights.map((f) => row(f, "flights"))}</div>
+        </div>
+        <div>
+          <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
+            <div className="travel-sec-head" style={{ marginTop: 0 }}>
+              <h2>Getting there</h2>
+              <span className="eyebrow">{flightPicked ? flightPicked.name : "none picked"}</span>
             </div>
+            <div className="tllist">{flights.map((f) => row(f, "flights"))}</div>
           </div>
-          {/* adding car rentals section */}
+        </div>
+        {/* adding car rentals section */}
         <div>
           <div className="bento-card travel-section" style={{ padding: "var(--card-pad)" }}>
             <div className="travel-sec-head" style={{ marginTop: 0 }}>
@@ -90,19 +90,19 @@ export default function TravelScreen({ useAppState }) {
             <div className="tllist">
               {carRentals.map((car) => carRow(car))}
             </div>
-          </div>          
+          </div>
         </div>
-        </div>
+      </div>
 
-        {both && (
-          <button
-            className="btn btn-primary btn-block"
-            style={{ marginTop: 22 }}
-            onClick={() => navigate("/plan")}
-          >
-            Looks good — back to the plan →
-          </button>
-        )}
-      </section>
+      {both && (
+        <button
+          className="btn btn-primary btn-block"
+          style={{ marginTop: 22 }}
+          onClick={() => navigate("/plan")}
+        >
+          Looks good — back to the plan →
+        </button>
+      )}
+    </section>
   );
 }

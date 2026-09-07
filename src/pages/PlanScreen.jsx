@@ -4,7 +4,7 @@ import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, useDragga
 import { PointerActivationConstraints } from "@dnd-kit/dom";
 import { PLAN, ROUTE_LEGS } from "../data/plans";
 import { SATISFACTION } from "../data/styles";
-import { HOTELS, FLIGHTS } from "../data/travel";
+import { HOTELS, FLIGHTS, CAR_RENTALS } from "../data/travel";
 import BottomSheet from "../components/BottomSheet";
 import InfiniteSpiral from "../components/InfiniteSpiral";
 import { searchPlaces } from "../services/placesAutocomplete";
@@ -115,6 +115,7 @@ export default function PlanScreen({ useAppState }) {
     markPlanSeen,
     hotel,
     flight,
+    carRental,
     startDate,
     endDate,
     activeItinerary,
@@ -139,7 +140,7 @@ export default function PlanScreen({ useAppState }) {
   const [undoStop, setUndoStop] = useState(null);
   const [undoItinerary, setUndoItinerary] = useState(null);
   const debounceRef = useRef(null);
-  
+
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
   const [routeGeometry, setRouteGeometry] = useState(null);
@@ -176,6 +177,8 @@ export default function PlanScreen({ useAppState }) {
   const sat = SATISFACTION[baseMode] || SATISFACTION.balanced;
   const hotelPicked = HOTELS.find((h) => h.id === hotel);
   const flightPicked = FLIGHTS.find((f) => f.id === flight);
+  const carPicked = CAR_RENTALS.find((c) => c.id === carRental);
+
   const itineraries = [
     ...MODES.map((id) => ({ id, label: MODE_LABELS[id], kind: "default" })),
     ...userSuggestedItineraries,
@@ -240,7 +243,6 @@ export default function PlanScreen({ useAppState }) {
     setTimeError("");
     selectItinerary(id);
   };
-
   const saveSnapshot = () => {
     if (!isChronological(activeStops)) {
       setTimeError("Arrival times must be in chronological order before saving.");
@@ -399,8 +401,9 @@ export default function PlanScreen({ useAppState }) {
           <div className="tl-picks">
             <div className="tl-pick"><span className="lbl">Stay</span><span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span></div>
             <div className="tl-pick"><span className="lbl">Flight</span><span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span></div>
+            <div className="tl-pick"><span className="lbl">Transport</span><span className="val">{carPicked ? `${carPicked.name} · ${carPicked.price}` : "none picked"}</span></div>
           </div>
-          <button className="btn btn-primary btn-block" onClick={() => navigateAway("/travel")}>Set stay &amp; flights →</button>
+          <button className="btn btn-primary btn-block" onClick={() => navigateAway("/travel")}>Set trip basics →</button>
         </div>
 
         <div className="whatif bento-card">
