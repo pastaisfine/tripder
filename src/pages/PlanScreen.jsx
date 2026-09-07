@@ -5,10 +5,12 @@ import { PointerActivationConstraints } from "@dnd-kit/dom";
 import { PLAN, ROUTE_LEGS } from "../data/plans";
 import { SATISFACTION } from "../data/styles";
 import { HOTELS, FLIGHTS } from "../data/travel";
-import SatisfactionRing from "../components/SatisfactionRing";
 import BottomSheet from "../components/BottomSheet";
 import InfiniteSpiral from "../components/InfiniteSpiral";
 import { searchPlaces } from "../services/placesAutocomplete";
+import Map, { Marker, Source, Layer } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { getDirections } from '../services/mapbox';
 
 const MODES = ["balanced", "foodfirst", "slower"];
 const MODE_LABELS = { balanced: "Balanced", foodfirst: "Food-first", slower: "Slower pace" };
@@ -68,7 +70,7 @@ function DragPreview({ stop }) {
   );
 }
 
-function DroppableStop({ stop, index, stops, open, menuId, setOpen, setMenuId, setSheetAction, moveStop, removeStop, updateTime }) {
+function DroppableStop({ stop, index, stops, open, menuId, setOpen, setMenuId, setSheetAction, moveStop, removeStop, updateTime, locateOnMap }) {
   const { ref: draggableRef, handleRef, isDragSource } = useDraggable({ id: stop.id, type: "itinerary-stop" });
   const { ref: droppableRef, isDropTarget } = useDroppable({ id: `drop:${stop.id}`, accept: "itinerary-stop" });
   const leg = index < stops.length - 1 ? ROUTE_LEGS[`${stop.id}:${stops[index + 1].id}`] : null;
@@ -94,6 +96,9 @@ function DroppableStop({ stop, index, stops, open, menuId, setOpen, setMenuId, s
               <button className="danger" onClick={() => removeStop(stop.id)}>Remove</button>
             </div>}
             <div className="exp">{stop.exp}</div>
+            {stop.lng && stop.lat && (
+              <button className="btn btn-secondary btn-block" style={{ marginTop: '12px' }} onClick={(e) => { e.stopPropagation(); locateOnMap(stop.lng, stop.lat); }}>View on map</button>
+            )}
           </div>
           <div className="stop-tags">{stop.tags.map((tag) => <span key={tag} className={`chip ${tagClass(tag)}`}>{tag}</span>)}</div>
         </div>
@@ -134,6 +139,28 @@ export default function PlanScreen({ useAppState }) {
   const [undoStop, setUndoStop] = useState(null);
   const [undoItinerary, setUndoItinerary] = useState(null);
   const debounceRef = useRef(null);
+  
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const [routeGeometry, setRouteGeometry] = useState(null);
+
+  useEffect(() => {
+    const coords = activeStops.filter((s) => s.lng && s.lat);
+    if (coords.length >= 2) {
+      getDirections(coords).then(setRouteGeometry);
+    } else {
+      setRouteGeometry(null);
+    }
+  }, [activeStops]);
+
+  const handleLocateOnMap = (lng, lat) => {
+    if (mapRef.current) {
+      mapRef.current.flyTo({ center: [lng, lat], zoom: 15, duration: 1500 });
+    }
+    if (mapContainerRef.current) {
+      mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   const planDay = useMemo(() => {
     if (startDate && endDate) {
@@ -333,17 +360,38 @@ export default function PlanScreen({ useAppState }) {
       </div>
 
       <div className="plan-cards">
-        <div className="sat bento-card">
-          <SatisfactionRing value={sat} />
-          <div className="info">
-            <h3>Group satisfaction</h3>
-            <p>Weighted across 4 profiles · driven by your tagged reasons.</p>
-            <div className="satcats">
-              <span className="chip tag-ok">Food · high</span>
-              <span className="chip">Culture · medium</span>
-              <span className="chip tag-off">Nightlife · low</span>
-            </div>
-          </div>
+        <div ref={mapContainerRef} className="map-bento-card bento-card" style={{ padding: 0, overflow: 'hidden', height: '240px', position: 'relative' }}>
+          <Map
+            ref={mapRef}
+            initialViewState={{
+              longitude: -9.1393,
+              latitude: 38.7138,
+              zoom: 12
+            }}
+            mapStyle="mapbox://styles/mapbox/streets-v12"
+            mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+          >
+            {activeStops.map(stop => stop.lng && stop.lat ? (
+              <Marker key={stop.id} longitude={stop.lng} latitude={stop.lat} color="#e5484d" />
+            ) : null)}
+            {routeGeometry && (
+              <Source id="route" type="geojson" data={routeGeometry}>
+                <Layer
+                  id="route-line"
+                  type="line"
+                  layout={{
+                    "line-join": "round",
+                    "line-cap": "round"
+                  }}
+                  paint={{
+                    "line-color": "#3b82f6",
+                    "line-width": 4,
+                    "line-opacity": 0.8
+                  }}
+                />
+              </Source>
+            )}
+          </Map>
         </div>
 
         <div className="bento-card">
@@ -379,7 +427,7 @@ export default function PlanScreen({ useAppState }) {
         finishDrag(event.operation.source?.id, targetId);
       }}>
         <div className="timeline">
-          {activeStops.map((stop, index) => <DroppableStop key={stop.id} stop={stop} index={index} stops={activeStops} open={open} menuId={menuId} setOpen={setOpen} setMenuId={setMenuId} setSheetAction={setSheetAction} moveStop={moveStop} removeStop={removeStop} updateTime={updateTime} />)}
+          {activeStops.map((stop, index) => <DroppableStop key={stop.id} stop={stop} index={index} stops={activeStops} open={open} menuId={menuId} setOpen={setOpen} setMenuId={setMenuId} setSheetAction={setSheetAction} moveStop={moveStop} removeStop={removeStop} updateTime={updateTime} locateOnMap={handleLocateOnMap} />)}
           <button className="btn btn-secondary plan-add-stop" onClick={() => setSheetAction({ type: "add" })}>+ Add stop</button>
         </div>
         <DragOverlay>{(source) => {
