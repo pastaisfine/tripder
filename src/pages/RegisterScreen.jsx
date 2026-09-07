@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { createOrUpdateTrip } from "../services/tripService";
 
 export default function RegisterScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signUp } = useAuth();
 
   const [username, setUsername] = useState("");
@@ -38,8 +40,20 @@ export default function RegisterScreen() {
       if (data?.user && (!data.session || !data.user.email_confirmed_at)) {
         setVerifySentEmail(email.trim());
       } else {
+        if (location.state?.action === "create_trip" && data?.user?.id) {
+          try {
+            const newTrip = await createOrUpdateTrip({
+              destination: "Lisbon, Portugal",
+              leaderId: data.user.id,
+            });
+            navigate("/setup", { state: { tripId: newTrip?.id }, replace: true });
+            return;
+          } catch (tripErr) {
+            console.warn("Failed to create trip after register:", tripErr);
+          }
+        }
         // Direct login if confirmation is disabled in Supabase
-        navigate("/hub");
+        navigate(location.state?.returnTo || "/hub", { replace: true });
       }
     } catch (err) {
       const msg = err?.message || "";
@@ -154,7 +168,7 @@ export default function RegisterScreen() {
           <div className="auth-footer">
             <p style={{ fontSize: 13, color: "var(--muted)", margin: "14px 0 8px" }}>
               Already have an account?{" "}
-              <Link to="/login" className="auth-link">
+              <Link to="/login" state={{ returnTo: location.state?.returnTo, action: location.state?.action }} className="auth-link">
                 Sign in
               </Link>
             </p>

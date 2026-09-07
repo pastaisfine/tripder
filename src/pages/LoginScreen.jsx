@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import { createOrUpdateTrip } from "../services/tripService";
 
 export default function LoginScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -30,7 +32,19 @@ export default function LoginScreen() {
         setSubmitting(false);
         return;
       }
-      navigate("/hub");
+      if (location.state?.action === "create_trip" && data?.user?.id) {
+        try {
+          const newTrip = await createOrUpdateTrip({
+            destination: "Lisbon, Portugal",
+            leaderId: data.user.id,
+          });
+          navigate("/setup", { state: { tripId: newTrip?.id }, replace: true });
+          return;
+        } catch (tripErr) {
+          console.warn("Failed to create trip after login:", tripErr);
+        }
+      }
+      navigate(location.state?.returnTo || "/hub", { replace: true });
     } catch (err) {
       const msg = err?.message || "";
       if (msg.toLowerCase().includes("invalid login credentials")) {
@@ -115,7 +129,7 @@ export default function LoginScreen() {
         <div className="auth-footer">
           <p style={{ fontSize: 13, color: "var(--muted)", margin: "14px 0 8px" }}>
             Don't have an account?{" "}
-            <Link to="/register" className="auth-link">
+            <Link to="/register" state={{ returnTo: location.state?.returnTo, action: location.state?.action }} className="auth-link">
               Create an account
             </Link>
           </p>

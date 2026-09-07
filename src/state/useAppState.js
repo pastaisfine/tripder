@@ -26,6 +26,8 @@ const DEFAULT_STATE = {
   userSuggestedItineraries: [],
   nextSuggestedNumber: 1,
   preferenceProfiles: {},
+  tripId: null,
+  tripMembers: [],
 };
 
 function isDefaultItinerary(id) {
@@ -280,6 +282,38 @@ export function useAppState() {
     });
   }, []);
 
+  const setTripId = useCallback((tripId) => {
+    setState((prev) => {
+      const next = { ...prev, tripId };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const setTripMembers = useCallback((tripMembers) => {
+    setState((prev) => {
+      const next = { ...prev, tripMembers };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const syncTrip = useCallback((trip, members = []) => {
+    setState((prev) => {
+      const next = {
+        ...prev,
+        tripId: trip?.id || prev.tripId,
+        dest: trip?.destination || prev.dest,
+        startDate: trip?.start_date ? new Date(trip.start_date).toISOString() : prev.startDate,
+        endDate: trip?.end_date ? new Date(trip.end_date).toISOString() : prev.endDate,
+        leader: trip?.leader_id || prev.leader,
+        tripMembers: members.length > 0 ? members : prev.tripMembers,
+      };
+      save(next);
+      return next;
+    });
+  }, []);
+
   const allCards = useMemo(() => [...CARD_DATA, ...state.addedCards], [state.addedCards]);
 
   const reasonCount = useMemo(
@@ -325,5 +359,8 @@ export function useAppState() {
     markPlanSeen,
     appendCard,
     savePreferenceProfile,
+    setTripId,
+    setTripMembers,
+    syncTrip,
   };
 }

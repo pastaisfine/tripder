@@ -26,9 +26,15 @@ export default function SplashScreen() {
             </p>
             <button
               className="btn btn-coral btn-block"
-              onClick={() => navigate("/setup")}
+              onClick={() => {
+                if (!user) {
+                  navigate("/login", { state: { returnTo: "/setup", action: "create_trip" } });
+                } else {
+                  navigate("/setup", { state: { action: "create_trip" } });
+                }
+              }}
             >
-              Start a trip
+              Create trip
             </button>
             <div className="note" style={{ color: "rgba(255,255,255,.85)", marginTop: 12 }}>
               {user ? (

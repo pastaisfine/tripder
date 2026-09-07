@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import AppHeader from "./components/AppHeader";
+import RequireAuth from "./components/RequireAuth";
 import TabBar from "./components/TabBar";
 import { AuthProvider } from "./context/AuthContext";
 import DoneScreen from "./pages/DoneScreen";
 import ForgotPasswordScreen from "./pages/ForgotPasswordScreen";
 import GroupScreen from "./pages/GroupScreen";
 import HubScreen from "./pages/HubScreen";
+import JoinTripScreen from "./pages/JoinTripScreen";
 import LoginScreen from "./pages/LoginScreen";
 import PlanScreen from "./pages/PlanScreen";
 import ProfileScreen from "./pages/ProfileScreen";
@@ -36,6 +38,7 @@ const CHROME = {
   "/profile": { header: true, invert: false, back: "/hub", backLabel: "Trip", tabs: true, active: "profile" },
   "/forgot-password": { header: true, invert: false, back: "/login", backLabel: "Login", tabs: false },
   "/reset-password": { header: true, invert: false, tabs: false },
+  "/join/:tripId": { header: true, invert: false, back: "/", backLabel: "Home", tabs: false },
 };
 
 function Shell() {
@@ -49,21 +52,24 @@ function Shell() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const protect = (element) => <RequireAuth>{element}</RequireAuth>;
+
   const screens = {
     "/": <SplashScreen />,
-    "/setup": <SetupScreen useAppState={appState} />,
-    "/hub": <HubScreen useAppState={appState} />,
-    "/travel": <TravelScreen useAppState={appState} />,
-    "/swipe": <SwipeScreen useAppState={appState} />,
-    "/done": <DoneScreen useAppState={appState} />,
-    "/style": <StyleScreen useAppState={appState} />,
-    "/plan": <PlanScreen useAppState={appState} />,
-    "/group": <GroupScreen useAppState={appState} />,
+    "/setup": protect(<SetupScreen useAppState={appState} />),
     "/login": <LoginScreen />,
     "/register": <RegisterScreen />,
-    "/profile": <ProfileScreen useAppState={appState} />,
     "/forgot-password": <ForgotPasswordScreen />,
     "/reset-password": <ResetPasswordScreen />,
+    "/join/:tripId": protect(<JoinTripScreen useAppState={appState} />),
+    "/swipe": protect(<SwipeScreen useAppState={appState} />),
+    "/hub": protect(<HubScreen useAppState={appState} />),
+    "/done": protect(<DoneScreen useAppState={appState} />),
+    "/style": protect(<StyleScreen useAppState={appState} />),
+    "/plan": protect(<PlanScreen useAppState={appState} />),
+    "/group": protect(<GroupScreen useAppState={appState} />),
+    "/travel": protect(<TravelScreen useAppState={appState} />),
+    "/profile": protect(<ProfileScreen useAppState={appState} />),
   };
 
   return <AuthProvider><div className="stage"><div className="device"><BrowserRouter><Routes>{Object.entries(CHROME).map(([path, cfg]) => <Route key={path} path={path} element={<div className={`app${cfg.tabs ? " app--sidebar" : ""}`}>{cfg.header && <AppHeader invert={cfg.invert} trip={cfg.trip || trip} back={cfg.back} backLabel={cfg.backLabel} theme={theme} toggleTheme={() => setTheme((current) => current === "dark" ? "light" : "dark")} />}{screens[path]}{cfg.tabs && <TabBar active={cfg.active} />}</div>} />)}</Routes></BrowserRouter></div></div></AuthProvider>;

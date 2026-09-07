@@ -1,24 +1,75 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import { MEMBERS } from "../data/members";
 import ProgressBar from "../components/ProgressBar";
 import InfiniteSpiral from "../components/InfiniteSpiral";
 import { fmtDateRange, dayCount } from "../utils/date";
+import { getTripMembers } from "../services/tripService";
 
 export default function HubScreen({ useAppState }) {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate, activeStops } = useAppState;
+  const {
+    likes,
+    skips,
+    reasonCount,
+    styleSeen,
+    styleName,
+    dest,
+    startDate,
+    endDate,
+    activeStops,
+    tripId,
+    tripMembers,
+    setTripMembers,
+  } = useAppState;
+
+  useEffect(() => {
+    if (tripId) {
+      getTripMembers(tripId).then((m) => {
+        if (m?.length > 0) setTripMembers(m);
+      }).catch(console.warn);
+    }
+  }, [tripId, setTripMembers]);
 
   const mineDone = likes + skips > 0;
-  const doneCount = 3 + (mineDone ? 1 : 0);
   const dateRange = fmtDateRange(startDate, endDate);
   const days = startDate && endDate ? dayCount(startDate, endDate) : 3;
   const spiralItems = useMemo(
     () => activeStops.map((stop) => ({ id: stop.id, src: stop.img, alt: stop.name })),
     [activeStops],
   );
+
+  const members = useMemo(() => {
+    if (tripMembers && tripMembers.length > 0) {
+      return tripMembers.map((m) => {
+        const isUser = m.userId === profile?.id;
+        const finished = isUser ? mineDone : false;
+        return {
+          k: m.userId,
+          n: m.username,
+          c: m.avatarColor || "#F19A6A",
+          done: finished,
+          st: finished ? "done" : isUser ? "you" : "swiping",
+          style: isUser ? styleName : "",
+        };
+      });
+    }
+
+    return [
+      {
+        k: profile?.id || "you",
+        n: profile?.username || "You",
+        c: profile?.avatarColor || "#F19A6A",
+        done: mineDone,
+        st: mineDone ? "done" : "you",
+        style: styleName || "",
+      },
+    ];
+  }, [tripMembers, profile, mineDone, styleName]);
+
+  const doneCount = members.filter((m) => m.done).length;
+  const totalCount = members.length;
 
   return (
     <section className="screen active spiral-screen spiral-screen--hub">
@@ -47,17 +98,17 @@ export default function HubScreen({ useAppState }) {
           <div className="veil" />
           <div className="hh">
             <div className="dest">{dest || "Lisbon, Portugal"}{dateRange ? ` — ${dateRange}` : ""}</div>
-            <div className="meta">{days} days · 4 friends</div>
+            <div className="meta">{days} days · {totalCount} {totalCount === 1 ? "friend" : "friends"}</div>
           </div>
         </div>
         <div className="hub-body">
           <section className="section-card bento-card" style={{ padding: "var(--card-pad)" }}>
             <h3>Who's swiped</h3>
             <div className="memberlist">
-              {MEMBERS.map((m) => {
-                const isUser = m.k === "alice";
+              {members.map((m) => {
+                const isUser = m.k === (profile?.id || "you");
                 const memberName = isUser ? (profile?.username || m.n) : m.n;
-                const finished = m.done || (isUser && mineDone);
+                const finished = m.done;
                 return (
                   <div key={m.k} className="mem" title={finished ? m.style || styleName : "not swiped yet"}>
                     <div className={`avatar ${finished ? "done" : ""}`} style={{ background: m.c }}>
@@ -69,9 +120,9 @@ export default function HubScreen({ useAppState }) {
                 );
               })}
             </div>
-            <ProgressBar value={Math.round((doneCount / 4) * 100)} />
+            <ProgressBar value={Math.round((doneCount / totalCount) * 100)} />
             <div style={{ fontSize: 12.5, color: "var(--muted)" }}>
-              {doneCount} of 4 swiped — the reveal unlocks when the last person finishes
+              {doneCount} of {totalCount} swiped — the reveal unlocks when the last person finishes
             </div>
           </section>
 
@@ -79,7 +130,7 @@ export default function HubScreen({ useAppState }) {
             <h3>{mineDone ? "You're in" : "Your turn"}</h3>
             <div className="card-sub" style={{ marginTop: 4 }}>
               {mineDone
-                ? `${likes} liked, ${skips} skipped, ${reasonCount} reasons logged. Ben, Priya and Marcus are already locked in.`
+                ? `${likes} liked, ${skips} skipped, ${reasonCount} reasons logged.${totalCount > 1 ? " Waiting for other crew members to finish swiping." : " Share your invite link to let friends vote!"}`
                 : "9 places, ~2 minutes. Swipe right for want, left for skip — add a short reason and the AI learns you."}
             </div>
             {mineDone && styleSeen && (

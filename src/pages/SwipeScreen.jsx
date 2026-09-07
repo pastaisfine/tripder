@@ -53,7 +53,7 @@ const HeartIcon = () => (
 
 export default function SwipeScreen({ useAppState }) {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, session, savePreferences: savePreferencesToDb } = useAuth();
   const { idx, likes, skips, reasonCount, swipeCard, saveReason, allCards, appendCard, preferenceProfiles, savePreferenceProfile } = useAppState;
   const preferenceId = profile?.id || profile?.username || "guest";
   const [preferenceOpen, setPreferenceOpen] = useState(() => sessionStorage.getItem("edit-preferences") === "true");
@@ -163,13 +163,21 @@ export default function SwipeScreen({ useAppState }) {
     dispatchSheets({ type: "close" });
   };
 
-  const savePreferences = () => {
-    savePreferenceProfile(preferenceId, { ...preferences, completed: true });
+  const savePreferences = async () => {
+    const prefs = { ...preferences, completed: true };
+    savePreferenceProfile(preferenceId, prefs);
+    if (session) {
+      try { await savePreferencesToDb(prefs); } catch (e) { console.warn("DB preference save failed:", e); }
+    }
     setPreferenceOpen(false);
   };
 
-  const skipPreferences = () => {
-    savePreferenceProfile(preferenceId, { ...preferences, completed: false, skipped: true });
+  const skipPreferences = async () => {
+    const prefs = { ...preferences, completed: false, skipped: true };
+    savePreferenceProfile(preferenceId, prefs);
+    if (session) {
+      try { await savePreferencesToDb(prefs); } catch (e) { console.warn("DB preference save failed:", e); }
+    }
     setPreferenceOpen(false);
   };
 
