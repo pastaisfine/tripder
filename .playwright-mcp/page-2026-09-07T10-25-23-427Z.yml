@@ -1,0 +1,10 @@
+- generic [ref=e6]:
+  - img "Lisbon rooftops" [ref=e8]
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: Tripder
+      - generic [ref=e12]: A group trip, actually decided
+    - generic [ref=e14]:
+      - heading "The group trip that everyone says yes to" [level=1] [ref=e15]
+      - paragraph [ref=e16]: Everyone swipes. Everyone says why. One itinerary nobody has to be talked into.
+      - button "Start a trip" [ref=e17] [cursor=pointer]

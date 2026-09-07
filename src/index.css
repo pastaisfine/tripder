@@ -2,22 +2,22 @@
 
 :root {
   /* ── canvas & surfaces ── */
-  --bg: #FBF7F0;
-  /* warm cream app canvas */
-  --bg-alt: #F5EDE4;
+  --bg: oklch(98.01% 0.0172 113.8);
+  /* pale sage mist app canvas */
+  --bg-alt: oklch(96.01% 0.0172 113.8);
   /* soft blush-sand wash */
-  --surface: #FFFDFA;
-  /* ivory card */
-  --surface-2: #FFFFFF;
-  --fg: #2E2723;
-  /* warm near-black ink */
-  --muted: #8C8078;
-  /* soft taupe metadata */
-  --border: #EFE4D9;
-  /* quiet sand line */
-  --accent: #EE7F65;
-  /* coral — primary signal */
-  --primary: #EE7F65;
+  --surface: oklch(98.94% 0.0119 101.5);
+  /* warm ivory card */
+  --surface-2: oklch(99.5% 0.01 101.5);
+  --fg: oklch(19.54% 0.0182 137.9);
+  /* near-black pine ink */
+  --muted: oklch(49.83% 0.0184 154.1);
+  /* softened green-gray metadata */
+  --border: oklch(90.54% 0.0172 145.4);
+  /* quiet sage line */
+  --accent: oklch(76.19% 0.1405 98.4);
+  /* sun yellow — primary signal */
+  --primary: var(--accent);
 
   --accent-soft: rgba(238, 127, 101, 0.13);
   --accent-deep: #D2593C;
@@ -53,8 +53,8 @@
   --nav-bg: #FFFDFA;
   --nav-ink: #8C8078;
 
-  --r-card: 22px;
-  --r-control: 15px;
+  --r-card: 16px;
+  --r-control: 12px;
   --r-pill: 9999px;
   --gap: 14px;
   --card-pad: 20px;
@@ -64,7 +64,7 @@
 
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   --ink: #1D2C1A;
   --sb: 56px;
@@ -244,15 +244,15 @@ textarea {
 
 .btn-primary {
   background: var(--fg);
-  color: #FFFDFA;
+  color: var(--surface);
   border-color: var(--fg);
-  box-shadow: 0 10px 22px -12px rgba(46, 39, 35, .55);
+  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary:hover {
-  background: #423831;
-  border-color: #423831;
-  box-shadow: 0 14px 28px -12px rgba(46, 39, 35, .6);
+  background: color-mix(in srgb, var(--fg) 85%, white);
+  border-color: color-mix(in srgb, var(--fg) 85%, white);
+  box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.5);
 }
 
 .btn-coral {

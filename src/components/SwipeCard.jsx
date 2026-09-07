@@ -35,26 +35,22 @@ export default function SwipeCard({ card, onVerdict, onDetail, stacked }) {
         dragShift.current = 0;
       }}
     >
-      <div className="ph">
-        <img src={card.img} alt={`${card.name} in Lisbon`} loading="lazy" />
-        <div className="veil" />
+      <div className="ph" style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        <img src={card.img} alt={`${card.name} in Lisbon`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div className="veil" style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(46, 39, 35, 0.1) 0%, transparent 20%, rgba(29, 44, 26, 0.4) 60%, rgba(29, 44, 26, 0.95) 100%)" }} />
         <div className="topline">
           <span className="chip" style={chipInline}>{card.cat.join(" · ")}</span>
           <span className="chip" style={chipInline}>{card.cost}</span>
         </div>
         <motion.div className="sw-verdict no" style={stacked === 0 ? { opacity: noOpacity } : {}}>SKIP</motion.div>
         <motion.div className="sw-verdict yes" style={stacked === 0 ? { opacity: yesOpacity } : {}}>GO</motion.div>
-        <div className="pname">
-          <h2>{card.name}</h2>
-          <div className="area">{card.area}</div>
-        </div>
       </div>
-      <div className="body">
-        <div className="rows">
-          <span className="chip">{card.area}</span>
-          <span className="chip">{card.cost}</span>
+      <div className="body" style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 1, background: "transparent", color: "#fff", padding: "20px" }}>
+        <div className="pname" style={{ position: "relative", bottom: 0, left: 0, right: 0, color: "#fff", marginBottom: "12px" }}>
+          <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "28px", letterSpacing: "-0.02em", textShadow: "0 2px 12px rgba(29, 44, 26, 0.6)" }}>{card.name}</h2>
+          <div className="area" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", letterSpacing: "0.11em", textTransform: "uppercase", opacity: 0.9, marginTop: "6px" }}>{card.area}</div>
         </div>
-        <p className="blurb">{card.blurb}</p>
+        <p className="blurb" style={{ fontSize: "14px", color: "rgba(255,255,255,0.85)", lineHeight: 1.4, margin: 0 }}>{card.blurb}</p>
       </div>
     </motion.div>
   );
