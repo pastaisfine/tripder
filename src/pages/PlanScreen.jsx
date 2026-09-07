@@ -128,6 +128,10 @@ export default function PlanScreen({ useAppState }) {
     saveItinerarySnapshot,
     deleteSuggestedItinerary,
     restoreSuggestedItinerary,
+    itineraryVotes,
+    confirmedItineraryId,
+    castVote,
+    confirmItinerary,
   } = useAppState;
   const [open, setOpen] = useState({});
   const [menuId, setMenuId] = useState(null);
@@ -179,10 +183,13 @@ export default function PlanScreen({ useAppState }) {
   const flightPicked = FLIGHTS.find((f) => f.id === flight);
   const carPicked = CAR_RENTALS.find((c) => c.id === carRental);
 
-  const itineraries = [
+  const allItineraries = [
     ...MODES.map((id) => ({ id, label: MODE_LABELS[id], kind: "default" })),
     ...userSuggestedItineraries,
   ];
+  const itineraries = confirmedItineraryId 
+    ? allItineraries.filter(i => i.id === confirmedItineraryId)
+    : allItineraries;
   const spiralItems = useMemo(
     () => activeStops.map((stop) => ({ id: stop.id, src: stop.img, alt: stop.name })),
     [activeStops],
@@ -416,7 +423,23 @@ export default function PlanScreen({ useAppState }) {
               </div>
             ))}
           </div>
-          <button className="btn btn-primary btn-block plan-save" onClick={saveSnapshot}>Save as user-suggested</button>
+          {confirmedItineraryId ? (
+            <div className="plan-draft" style={{ color: '#2b8a3e', marginTop: '12px', fontWeight: 'bold' }}>✓ This plan is confirmed</div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => castVote(activeItinerary.id)}>
+                  Vote ({itineraryVotes[activeItinerary.id] || 0})
+                </button>
+                {((itineraryVotes[activeItinerary.id] || 0) > 0 && (itineraryVotes[activeItinerary.id] || 0) === Math.max(0, ...Object.values(itineraryVotes))) && (
+                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => confirmItinerary(activeItinerary.id)}>
+                    Confirm Plan
+                  </button>
+                )}
+              </div>
+              <button className="btn btn-secondary btn-block plan-save" onClick={saveSnapshot} style={{ marginTop: '8px' }}>Save as user-suggested</button>
+            </>
+          )}
           {isItineraryDirty && <span className="plan-draft">Unsaved edits</span>}
           {timeError && <div className="plan-error" role="alert">{timeError}</div>}
         </div>
@@ -440,7 +463,7 @@ export default function PlanScreen({ useAppState }) {
       </DragDropProvider>
 
       <div className="why-head"><h3>Why this way?</h3></div>
-      <details className="why-note" style={{ margin: "10px 20px 6px" }}><summary>Negotiation notes</summary><div className="bullets"><ul style={{ margin: 0, paddingLeft: 18 }}>{plan.why.map((why, index) => <li key={index} style={{ marginBottom: 8 }} dangerouslySetInnerHTML={{ __html: why }} />)}</ul></div></details>
+      <details className="why-note"><summary>Negotiation notes</summary><div className="bullets"><ul style={{ margin: 0, paddingLeft: 18 }}>{plan.why.map((why, index) => <li key={index} style={{ marginBottom: 8 }} dangerouslySetInnerHTML={{ __html: why }} />)}</ul></div></details>
 
       <BottomSheet open={Boolean(sheetAction)} onClose={() => setSheetAction(null)}>
         <h3>{sheetAction?.type === "replace" ? "Replace stop" : "Add a stop"}</h3>

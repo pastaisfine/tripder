@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { CARD_DATA } from "../data/cards";
 import { PLAN } from "../data/plans";
+import { TASKS } from "../data/tasks";
 
 const LS_KEY = "tripder-state-v1";
 
@@ -26,7 +27,9 @@ const DEFAULT_STATE = {
   userSuggestedItineraries: [],
   nextSuggestedNumber: 1,
   preferenceProfiles: {},
-  tasks: [],
+  tasks: TASKS,
+  itineraryVotes: {},
+  confirmedItineraryId: null,
 };
 
 function isDefaultItinerary(id) {
@@ -54,7 +57,8 @@ function load() {
           ? { ...card, img: "/images/alfama.jpg" }
           : card,
       );
-      return { ...DEFAULT_STATE, ...s, addedCards };
+      const tasks = s.tasks && s.tasks.length > 0 ? s.tasks : TASKS;
+      return { ...DEFAULT_STATE, ...s, addedCards, tasks };
     }
   } catch {}
   return { ...DEFAULT_STATE };
@@ -332,6 +336,39 @@ export function useAppState() {
     });
   }, []);
 
+  const castVote = useCallback((itineraryId) => {
+    setState((prev) => {
+      const allIds = [
+        "balanced",
+        "foodfirst",
+        "slower",
+        ...prev.userSuggestedItineraries.map(i => i.id)
+      ];
+      const nextVotes = { ...prev.itineraryVotes };
+      
+      // The user casts 1 vote
+      nextVotes[itineraryId] = (nextVotes[itineraryId] || 0) + 1;
+
+      // Simulate 3 other members voting randomly, but slightly preferring the user's choice
+      for (let i = 0; i < 3; i++) {
+        const randomId = Math.random() > 0.4 ? itineraryId : allIds[Math.floor(Math.random() * allIds.length)];
+        nextVotes[randomId] = (nextVotes[randomId] || 0) + 1;
+      }
+
+      const next = { ...prev, itineraryVotes: nextVotes };
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const confirmItinerary = useCallback((id) => {
+    setState((prev) => {
+      const next = { ...prev, confirmedItineraryId: id };
+      save(next);
+      return next;
+    });
+  }, []);
+
   const allCards = useMemo(() => [...CARD_DATA, ...state.addedCards], [state.addedCards]);
 
   const reasonCount = useMemo(
@@ -381,5 +418,7 @@ export function useAppState() {
     acceptTask,
     completeTask,
     removeTask,
+    castVote,
+    confirmItinerary,
   };
 }

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import { MEMBERS } from "../data/members";
+import { MEMBERS, AVATAR_COLORS } from "../data/members";
+import { TASKS } from "../data/tasks";
 import { HOTELS, FLIGHTS, CAR_RENTALS } from "../data/travel";
 import ProgressBar from "../components/ProgressBar";
 import InfiniteSpiral from "../components/InfiniteSpiral";
@@ -12,7 +13,7 @@ export default function HubScreen({ useAppState }) {
   const { profile } = useAuth();
   const {
     likes, skips, reasonCount, styleSeen, styleName, dest, startDate, endDate, activeStops,
-    hotel, flight, carRental
+    hotel, flight, carRental, confirmedItineraryId
   } = useAppState;
 
   const hotelPicked = HOTELS.find((h) => h.id === hotel);
@@ -144,8 +145,43 @@ export default function HubScreen({ useAppState }) {
           </button>
         </section>
 
-        {/* 4. Shared Plan Ready Section */}
-        {styleSeen && (
+        {/* 4. Tasks Section */}
+        <section className="bento-card" style={{ padding: "var(--card-pad)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h3 style={{ margin: 0 }}>Trip tasks</h3>
+            <span style={{ fontSize: 12, color: "var(--muted)" }}>{TASKS.filter(t => t.status === "done").length} / {TASKS.length} done</span>
+          </div>
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            {TASKS.map(task => {
+              const member = MEMBERS.find(m => m.k === task.assignedTo);
+              const avatarColor = AVATAR_COLORS[task.assignedTo] || "#ccc";
+              const isDone = task.status === "done";
+              return (
+                <div key={task.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", background: "var(--bg-card-sub, rgba(255,255,255,0.04))", borderRadius: 8 }}>
+                  <div 
+                    style={{ 
+                      width: 20, height: 20, borderRadius: "50%", 
+                      border: `2px solid ${isDone ? "var(--accent, #a8ff78)" : "var(--muted)"}`,
+                      background: isDone ? "var(--accent, #a8ff78)" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center"
+                    }}
+                  >
+                    {isDone && <span style={{ color: "#000", fontSize: 12 }}>✓</span>}
+                  </div>
+                  <div style={{ flex: 1, textDecoration: isDone ? "line-through" : "none", color: isDone ? "var(--muted)" : "inherit", fontSize: 14 }}>
+                    {task.title}
+                  </div>
+                  <div className="avatar" style={{ background: avatarColor, width: 24, height: 24, fontSize: 10 }}>
+                    {member ? (member.k === "alice" ? (profile?.username || member.n) : member.n).slice(0, 1).toUpperCase() : "?"}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 5. Shared Plan Ready / Confirmed Itinerary Section */}
+        {styleSeen && !confirmedItineraryId && (
           <section className="bento-card" style={{ padding: "var(--card-pad)" }}>
             <h3>Shared plan's ready</h3>
             <div className="card-sub" style={{ marginTop: 4 }}>
@@ -158,6 +194,30 @@ export default function HubScreen({ useAppState }) {
             >
               See the shared plan →
             </button>
+          </section>
+        )}
+
+        {confirmedItineraryId && (
+          <section className="bento-card" style={{ padding: "var(--card-pad)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0 }}>Confirmed Itinerary</h3>
+              <button className="btn btn-secondary" style={{ padding: "4px 8px", fontSize: 12, marginLeft: "8px" }} onClick={() => navigate("/plan")}>View details</button>
+            </div>
+            <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+              {activeStops.map((stop, i) => (
+                <div key={stop.id} style={{ display: "flex", gap: 14, alignItems: "stretch" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 44 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{stop.t}</span>
+                    {i < activeStops.length - 1 && (
+                      <div style={{ width: 2, flex: 1, minHeight: 16, background: "var(--border)", margin: "4px 0" }}></div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, fontSize: 15, paddingBottom: i < activeStops.length - 1 ? 12 : 0, color: "var(--text)", fontWeight: 500 }}>
+                    {stop.name}
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
       </div>
