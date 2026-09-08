@@ -67,7 +67,6 @@ graph TD
             LineSidebar["LineSidebar\n(Plan timeline)"]
             PreferenceForm
             ReasonChips
-            SatisfactionRing
             StyleCard
             BottomSheet
             ProgressBar
@@ -198,7 +197,7 @@ WhereDo/
 │   │   ├── TravelScreen.jsx      # In-trip logistics + Mapbox map
 │   │   └── ProfileScreen.jsx     # User profile & auth settings
 │   │
-│   ├── components/               # Reusable UI components (13 files)
+│   ├── components/               # Reusable UI components (12 files)
 │   │   ├── AppHeader.jsx         # Top nav bar
 │   │   ├── TabBar.jsx            # Bottom tab navigation
 │   │   ├── SwipeCard.jsx         # Individual swipeable card
@@ -206,7 +205,6 @@ WhereDo/
 │   │   ├── LineSidebar.jsx       # Timeline sidebar for plan view
 │   │   ├── PreferenceForm.jsx    # Swipe reason capture form
 │   │   ├── ReasonChips.jsx       # Tag chips for swipe reasons
-│   │   ├── SatisfactionRing.jsx  # Group satisfaction indicator
 │   │   ├── StyleCard.jsx         # Travel style option card
 │   │   ├── BottomSheet.jsx       # Slide-up modal sheet
 │   │   └── ProgressBar.jsx       # Progress indicator

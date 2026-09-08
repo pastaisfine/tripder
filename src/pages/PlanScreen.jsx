@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor, useDraggable, useDroppable } from "@dnd-kit/react";
 import { PointerActivationConstraints } from "@dnd-kit/dom";
 import { PLAN, ROUTE_LEGS } from "../data/plans";
-import { SATISFACTION } from "../data/styles";
 import { HOTELS, FLIGHTS, CAR_RENTALS } from "../data/travel";
 import BottomSheet from "../components/BottomSheet";
 import InfiniteSpiral from "../components/InfiniteSpiral";
@@ -178,7 +177,6 @@ export default function PlanScreen({ useAppState }) {
 
   const baseMode = activeItinerary.baseMode || (PLAN[activeItinerary.id] ? activeItinerary.id : mode);
   const plan = PLAN[baseMode] || PLAN.balanced;
-  const sat = SATISFACTION[baseMode] || SATISFACTION.balanced;
   const hotelPicked = HOTELS.find((h) => h.id === hotel);
   const flightPicked = FLIGHTS.find((f) => f.id === flight);
   const carPicked = CAR_RENTALS.find((c) => c.id === carRental);
@@ -381,7 +379,7 @@ export default function PlanScreen({ useAppState }) {
             mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
           >
             {activeStops.map(stop => stop.lng && stop.lat ? (
-              <Marker key={stop.id} longitude={stop.lng} latitude={stop.lat} color="#e5484d" />
+              <Marker key={stop.id} longitude={stop.lng} latitude={stop.lat} color="#C49B28" />
             ) : null)}
             {routeGeometry && (
               <Source id="route" type="geojson" data={routeGeometry}>
@@ -393,9 +391,9 @@ export default function PlanScreen({ useAppState }) {
                     "line-cap": "round"
                   }}
                   paint={{
-                    "line-color": "#3b82f6",
+                    "line-color": "#2D483A",
                     "line-width": 4,
-                    "line-opacity": 0.8
+                    "line-opacity": 0.9
                   }}
                 />
               </Source>
