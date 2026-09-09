@@ -155,7 +155,7 @@ export default function ProfileScreen({ useAppState }) {
               {profile?.avatarUrl ? (
                 <img src={profile.avatarUrl} alt={profile.username} className="profile-avatar-img" />
               ) : (
-                <div className="avatar profile-avatar-fallback" style={{ background: "var(--accent)" }}>
+                <div className="avatar profile-avatar-fallback" style={{ background: "var(--fg)", color: "var(--surface)", fontWeight: 700 }}>
                   {initial}
                 </div>
               )}
@@ -262,11 +262,11 @@ export default function ProfileScreen({ useAppState }) {
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
             {styleName && (
-              <span className="tag tag-ok">Style: {styleName}</span>
+              <span className="chip sel">Style: {styleName}</span>
             )}
-            <span className="tag tag-off">{likes} Likes</span>
-            <span className="tag tag-off">{skips} Skips</span>
-            <span className="tag tag-off">{reasonCount} Reasons</span>
+            <span className="chip">{likes} Likes</span>
+            <span className="chip">{skips} Skips</span>
+            <span className="chip">{reasonCount} Reasons</span>
           </div>
         </div>
 

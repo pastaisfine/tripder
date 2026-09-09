@@ -77,28 +77,188 @@ export default function SetupScreen({ useAppState }) {
 
   return (
     <section className="screen active screen-setup">
-      <div className="setup-head"><div><div className="eyebrow">New trip</div></div></div>
-      <div className="setup-hero"><div className="cap"><span className="c">Where to, crew?</span><span className="m">Lisbon · SE Europe</span></div></div>
-      <div className="field"><label>Destination</label><input className="input" value={dest} onChange={(event) => setDest(event.target.value)} placeholder="Lisbon, Portugal" /><div className="hint">Trip name auto-fills from your destination</div></div>
-      <div className="field">
-        <label>When</label>
-        <div className="cal-wrap" style={{ zoom: 1.5, margin: "0 auto" }}><div className="cal-nav"><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, -1))} disabled={calMonth <= today}>‹</button><span className="cal-title">{MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}</span><button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, 1))}>›</button></div>
-          <div className="cal-grid">{DAYS.map((day) => <div key={day} className="cal-head">{day}</div>)}{grid.map((date, index) => {
-            if (!date) return <div key={`empty-${index}`} className="cal-day empty" />;
-            const past = date < today;
-            const className = ["cal-day", past && "disabled", isSameDay(date, startDate) && "start", isSameDay(date, endDate) && "end", startDate && endDate && isBetween(date, startDate, endDate) && "in-range"].filter(Boolean).join(" ");
-            return <button key={index} className={className} onClick={() => handleDayClick(date)} disabled={past}>{date.getDate()}</button>;
-          })}</div>
-        </div>
-        {(startDate || endDate) && <button className="cal-clear" onClick={clearDates}>Clear dates</button>}
-        <div className="datesummary" onClick={() => setScheduleOpen((open) => !open)}>{summary()}<span className="caret">▾</span></div>
-        {scheduleOpen && <div className="dateschedule" style={{ display: "block" }}><div className="dateschedule-head"><span>Schedule</span><span>{scheduleDays.length} day{scheduleDays.length === 1 ? "" : "s"}</span></div><div className="dateschedule-list">{scheduleDays.map((date) => <div key={date.toISOString()} className="dsrow"><span className="ds-d">{fmtShort(date)}</span><span className="ds-m">{fmtDay(date).toUpperCase()}</span></div>)}{scheduleDays.length === 0 && <div className="dsempty">No dates selected</div>}</div></div>}
+      {/* Top Title */}
+      <div style={{ padding: "4px 4px 0" }}>
+        <div className="eyebrow" style={{ color: "var(--muted)" }}>Trip Planning</div>
+        <h1 style={{ margin: "4px 0 0", fontSize: 26, fontWeight: 800, color: "var(--fg)", letterSpacing: "-0.03em" }}>
+          Where to, crew?
+        </h1>
+        <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--muted)" }}>
+          Set the destination, pick dates, and invite your travel companions.
+        </p>
       </div>
-      <div className="field"><label>Invite your crew</label><div className="friends">{allMembers.map((friend) => <div key={friend.k} className={`friendrow ${friend.k === "alice" || invited[friend.k] ? "sel" : ""} ${leader === friend.k ? "is-leader" : ""}`} onClick={() => friend.k !== "alice" && setInvited((current) => ({ ...current, [friend.k]: !current[friend.k] }))}><div className="avatar sm" style={{ background: friend.c }}>{friend.n.slice(0, 2)}</div><div><div className="fname">{friend.n}{friend.k === "alice" && <span className="you-tag">you</span>}</div><div className="frole">{friend.role}</div></div>{leader === friend.k && <Crown className="leader-badge" size={18} weight="fill" title="Trip leader" />}{friend.k !== "alice" && <button className="leader-xfer" title="Make trip leader" onClick={(event) => { event.stopPropagation(); setLeader(friend.k); }}><Star size={14} weight="fill" /></button>}<span className="fcheck">✓</span></div>)}</div><div className="hint">Tap ★ to pass the leader role</div></div>
-      <button className="invite-btn" onClick={() => setInviteOpen((open) => !open)}><span className="plus">+</span> Copy invite link</button>
-      {inviteOpen && <div className="invitebox"><div className="invitebox-title">Invite the group</div><div className="invitebox-desc">Share this link - they'll land straight on the swipe screen.</div><div className="invitebox-copy"><input className="input" readOnly value={link} /><button className="btn btn-secondary" style={{ minHeight: 44 }} onClick={copyInvite}>{copied ? "Copied" : "Copy link"}</button></div></div>}
-       <button className="btn btn-primary btn-block" style={{ marginTop: 20 }} onClick={() => setPreferenceOpen(true)}>Create trip & invite group</button>
-       <BottomSheet open={preferenceOpen} onClose={() => continueToSwipe(true)} className="preference-sheet"><PreferenceForm preferences={preferences} onChange={(key, value) => setPreferences((current) => ({ ...current, [key]: value }))} onDietaryToggle={toggleDietary} onSkip={() => continueToSwipe(true)} onSave={() => continueToSwipe(false)} /></BottomSheet>
+
+      {/* 1. Destination Card */}
+      <div className="bento-card" style={{ padding: 20 }}>
+        <label style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--fg)" }}>
+          Destination
+        </label>
+        <input
+          className="input"
+          value={dest}
+          onChange={(event) => setDest(event.target.value)}
+          placeholder="Lisbon, Portugal"
+          style={{ marginTop: 4, height: 48, borderRadius: 14, border: "1px solid var(--border)", background: "var(--bg)", color: "var(--fg)", padding: "0 14px", fontSize: 15 }}
+        />
+        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
+          Trip name and recommendations adapt to your destination
+        </div>
+      </div>
+
+      {/* 2. Calendar / Dates Card */}
+      <div className="bento-card" style={{ padding: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <label style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--fg)" }}>
+            Dates
+          </label>
+          {(startDate || endDate) && (
+            <button
+              onClick={clearDates}
+              style={{ background: "none", border: "none", color: "var(--nom)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: 0 }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        <div className="cal-wrap" style={{ width: "100%", margin: "10px 0 4px" }}>
+          <div className="cal-nav" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, -1))} disabled={calMonth <= today} style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--fg)", cursor: "pointer" }}>‹</button>
+            <span className="cal-title" style={{ fontWeight: 700, fontSize: 14, color: "var(--fg)" }}>{MONTHS[calMonth.getMonth()]} {calMonth.getFullYear()}</span>
+            <button className="cal-navbtn" onClick={() => setCalMonth(addMonths(calMonth, 1))} style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--fg)", cursor: "pointer" }}>›</button>
+          </div>
+          <div className="cal-grid">
+            {DAYS.map((day) => <div key={day} className="cal-head" style={{ fontSize: 11, fontWeight: 600, color: "var(--muted)", textAlign: "center" }}>{day}</div>)}
+            {grid.map((date, index) => {
+              if (!date) return <div key={`empty-${index}`} className="cal-day empty" />;
+              const past = date < today;
+              const className = ["cal-day", past && "disabled", isSameDay(date, startDate) && "start", isSameDay(date, endDate) && "end", startDate && endDate && isBetween(date, startDate, endDate) && "in-range"].filter(Boolean).join(" ");
+              return <button key={index} className={className} onClick={() => handleDayClick(date)} disabled={past}>{date.getDate()}</button>;
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 8,
+            padding: "10px 14px",
+            background: "var(--bg)",
+            borderRadius: 14,
+            border: "1px solid var(--border)",
+            fontSize: 13,
+            fontWeight: 500,
+            color: "var(--fg)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={() => setScheduleOpen((open) => !open)}
+        >
+          <span>{summary()}</span>
+          <span style={{ fontSize: 10, color: "var(--muted)" }}>{scheduleOpen ? "▲" : "▼"}</span>
+        </div>
+
+        {scheduleOpen && scheduleDays.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10, padding: 12, background: "var(--bg)", borderRadius: 14 }}>
+            {scheduleDays.map((date) => (
+              <div key={date.toISOString()} style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "var(--fg)" }}>
+                <span>{fmtShort(date)}</span>
+                <span style={{ fontWeight: 600, color: "var(--muted)" }}>{fmtDay(date).toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 3. Invite Friends Card */}
+      <div className="bento-card" style={{ padding: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <label style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--fg)" }}>
+            Invite your crew
+          </label>
+          <span style={{ fontSize: 11, color: "var(--muted)" }}>Tap ★ for leader</span>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+          {allMembers.map((friend) => {
+            const isSel = friend.k === "alice" || invited[friend.k];
+            const isLead = leader === friend.k;
+            return (
+              <div
+                key={friend.k}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 14px",
+                  background: isSel ? "var(--bg)" : "transparent",
+                  borderRadius: 16,
+                  border: `1px solid ${isSel ? "var(--border)" : "transparent"}`,
+                  cursor: friend.k !== "alice" ? "pointer" : "default",
+                  transition: "all 0.15s ease",
+                }}
+                onClick={() => friend.k !== "alice" && setInvited((current) => ({ ...current, [friend.k]: !current[friend.k] }))}
+              >
+                <div style={{ width: 34, height: 34, borderRadius: "50%", background: friend.c, color: "var(--surface)", display: "grid", placeItems: "center", fontWeight: 700, fontSize: 12 }}>
+                  {friend.n.slice(0, 2).toUpperCase()}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--fg)" }}>
+                    {friend.n} {friend.k === "alice" && <span style={{ fontSize: 10, background: "var(--fg)", color: "var(--surface)", padding: "2px 6px", borderRadius: 999, marginLeft: 4 }}>you</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--muted)" }}>{friend.role}</div>
+                </div>
+
+                {isLead && <Crown size={18} weight="fill" color="var(--accent)" title="Trip leader" />}
+                {friend.k !== "alice" && (
+                  <button
+                    style={{ background: "none", border: "none", color: isLead ? "var(--accent)" : "var(--border)", cursor: "pointer", padding: 4 }}
+                    title="Make trip leader"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setLeader(friend.k);
+                    }}
+                  >
+                    <Star size={16} weight={isLead ? "fill" : "regular"} />
+                  </button>
+                )}
+                <span style={{ fontSize: 13, fontWeight: 700, color: isSel ? "var(--gerund)" : "var(--border)" }}>
+                  {isSel ? "✓" : "○"}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          className="btn btn-secondary btn-block"
+          style={{ marginTop: 12 }}
+          onClick={() => setInviteOpen((open) => !open)}
+        >
+          {copied ? "Link Copied to Clipboard!" : "Share Invite Link"}
+        </button>
+
+        {inviteOpen && (
+          <div style={{ marginTop: 10, padding: 14, background: "var(--bg)", borderRadius: 16, border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ fontSize: 12.5, color: "var(--muted)" }}>Anyone with this link lands directly in your trip.</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input className="input" readOnly value={link} style={{ flex: 1, fontSize: 13, padding: "0 10px", height: 38, borderRadius: 10, background: "var(--surface)", border: "1px solid var(--border)" }} />
+              <button className="btn btn-primary" style={{ minHeight: 38, padding: "0 14px", fontSize: 13 }} onClick={copyInvite}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <button className="btn btn-primary btn-block" style={{ marginTop: 8 }} onClick={() => setPreferenceOpen(true)}>
+        Create trip & invite group →
+      </button>
+
+      <BottomSheet open={preferenceOpen} onClose={() => continueToSwipe(true)} className="preference-sheet">
+        <PreferenceForm preferences={preferences} onChange={(key, value) => setPreferences((current) => ({ ...current, [key]: value }))} onDietaryToggle={toggleDietary} onSkip={() => continueToSwipe(true)} onSave={() => continueToSwipe(false)} />
+      </BottomSheet>
     </section>
   );
 }

@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Compass, Cards, MapTrifold, CheckSquareOffset, Users, User } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { Compass, Cards, MapTrifold, CheckSquareOffset, Users } from "phosphor-react";
 import LineSidebar from "./LineSidebar";
 
 const TABS = [
@@ -9,62 +8,53 @@ const TABS = [
   { to: "/plan", label: "Plan", icon: MapTrifold },
   { to: "/tasks", label: "Tasks", icon: CheckSquareOffset },
   { to: "/group", label: "Group", icon: Users },
-  { to: "/profile", label: "Profile", icon: User },
 ];
 
 export default function TabBar({ active }) {
   const navigate = useNavigate();
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 900);
-
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 900);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const activeIndex = TABS.findIndex((tab) => tab.label.toLowerCase() === active);
-  
-  if (isDesktop) {
-    return (
-      <div className="tabbar tabbar-desktop">
+
+  return (
+    <>
+      <aside className="tabbar tabbar-desktop" aria-label="Desktop Navigation">
         <LineSidebar
           key={active}
           items={TABS.map((tab) => tab.label)}
-          accentColor="var(--accent)"
+          accentColor="var(--fg)"
           textColor="var(--muted)"
           markerColor="var(--border)"
           proximityRadius={72}
           maxShift={12}
-          markerLength={26}
+          markerLength={28}
           tickScale={0.5}
-          itemGap={18}
-          fontSize={0.78}
+          itemGap={22}
+          fontSize={0.9}
           smoothing={100}
-          defaultActive={activeIndex}
+          defaultActive={activeIndex >= 0 ? activeIndex : 0}
           onItemClick={(index) => navigate(TABS[index].to)}
         />
-      </div>
-    );
-  }
+      </aside>
 
-  return (
-    <div className="tabbar tabbar-mobile">
-      <nav className="bottom-nav">
-        {TABS.map((tab) => {
-          const isActive = tab.label.toLowerCase() === active;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.to}
-              className={`nav-item ${isActive ? "active" : ""}`}
-              onClick={() => navigate(tab.to)}
-            >
-              <Icon weight={isActive ? "fill" : "regular"} size={22} />
-              {isActive && <div className="nav-indicator" />}
-            </button>
-          );
-        })}
-      </nav>
-    </div>
+      <div className="tabbar tabbar-mobile" aria-label="Bottom Navigation">
+        <nav className="bottom-nav">
+          {TABS.map((tab) => {
+            const isActive = tab.label.toLowerCase() === active;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.to}
+                className={`nav-item ${isActive ? "active" : ""}`}
+                onClick={() => navigate(tab.to)}
+                title={tab.label}
+                aria-label={tab.label}
+              >
+                <Icon weight={isActive ? "fill" : "regular"} size={22} />
+                {isActive && <div className="nav-indicator" />}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </>
   );
 }

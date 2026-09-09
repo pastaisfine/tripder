@@ -205,13 +205,13 @@ return (
         </div>
         <div className="swipe-head">
           <div>
-            <div className="eyebrow">Swipe for you</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, marginTop: 2 }}>
-              {Math.min(idx + 1, total)} <span style={{ color: "var(--muted)" }}>of {total}</span>
+            <div className="eyebrow" style={{ color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>Swipe deck</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, marginTop: 2, color: "var(--fg)" }}>
+              {Math.min(idx + 1, total)} <span style={{ color: "var(--muted)", fontWeight: 400 }}>of {total} places</span>
             </div>
           </div>
-          <div className="swipe-tally">
-            {likes + skips} swipes · {reasonCount} reasons
+          <div className="chip" style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--fg)", fontWeight: 600, fontSize: 12, padding: "4px 12px" }}>
+            {likes} liked · {skips} skipped
           </div>
         </div>
 

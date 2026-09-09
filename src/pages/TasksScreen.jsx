@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { CheckCircle, CircleNotch } from "phosphor-react";
+import { CheckCircle, CircleNotch, Microphone, StopCircle } from "phosphor-react";
 import { useAuth } from "../context/useAuth";
 import { parseTasksFromMessage } from "../services/taskAgent";
+import { supabase } from "../lib/supabase";
 
 const STATUS_LABELS = {
   open: "Open",
@@ -70,9 +71,77 @@ export default function TasksScreen({ useAppState }) {
   const [error, setError] = useState("");
   const [logs, setLogs] = useState([]);
 
+  // Audio recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
   const logsQueue = useRef([]);
   const logsInterval = useRef(null);
   const logsEndRef = useRef(null);
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await handleTranscribe(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setError("");
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      setError("Could not access microphone.");
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+    }
+  }
+
+  async function handleTranscribe(audioBlob) {
+    setTranscribing(true);
+    setError("");
+    
+    try {
+      // Need to invoke our new Supabase edge function
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "recording.webm");
+
+      const { data, error: functionError } = await supabase.functions.invoke("transcribe-audio", {
+        body: formData,
+      });
+
+      if (functionError) throw functionError;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.text) {
+        setMessage(prev => (prev ? prev + " " + data.text : data.text));
+      }
+    } catch (err) {
+      console.error("Transcription error:", err);
+      setError("Transcription failed: " + err.message);
+    } finally {
+      setTranscribing(false);
+    }
+  }
 
   // Smooth out log streaming
   useEffect(() => {
@@ -168,15 +237,33 @@ export default function TasksScreen({ useAppState }) {
             Describe what hasn't been done yet. The agent will extract actionable tasks.
           </div>
 
-          <textarea
-            className="task-input"
-            rows={3}
-            placeholder={`e.g. "The flight and hotel haven't been booked yet, and we still need to figure out transport."`}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-          />
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <textarea
+              className="task-input"
+              style={{ flex: 1, margin: 0 }}
+              rows={3}
+              placeholder={`e.g. "The flight and hotel haven't been booked yet, and we still need to figure out transport."`}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={loading || transcribing}
+            />
+            <button
+              className={`btn ${isRecording ? 'btn-danger' : 'btn-secondary'}`}
+              style={{ padding: "12px", height: "100%", minHeight: "86px", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={loading || transcribing}
+              title={isRecording ? "Stop recording" : "Record voice"}
+            >
+              {isRecording ? <StopCircle size={24} color="var(--danger, red)" weight="fill" /> : <Microphone size={24} />}
+            </button>
+          </div>
+
+          {transcribing && (
+            <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+              <CircleNotch size={14} className="spin-anim" /> Transcribing audio...
+            </div>
+          )}
 
           {error && <div className="task-error">{error}</div>}
 
@@ -185,7 +272,7 @@ export default function TasksScreen({ useAppState }) {
               className="btn btn-primary btn-block"
               style={{ marginTop: 12 }}
               onClick={handleParse}
-              disabled={loading || !message.trim()}
+              disabled={loading || transcribing || isRecording || !message.trim()}
             >
               {loading ? "Parsing…" : "Parse tasks →"}
             </button>

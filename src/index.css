@@ -1,75 +1,64 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* ── canvas & surfaces ── */
-  --bg: oklch(98.01% 0.0172 113.8);
-  /* pale sage mist app canvas */
-  --bg-alt: oklch(96.01% 0.0172 113.8);
-  /* soft blush-sand wash */
-  --surface: oklch(98.94% 0.0119 101.5);
-  /* warm ivory card */
-  --surface-2: oklch(99.5% 0.01 101.5);
-  --fg: oklch(19.54% 0.0182 137.9);
-  /* near-black pine ink */
-  --muted: oklch(49.83% 0.0184 154.1);
-  /* softened green-gray metadata */
-  --border: oklch(90.54% 0.0172 145.4);
-  /* quiet sage line */
-  --accent: oklch(76.19% 0.1405 98.4);
-  /* sun yellow — primary signal */
-  --primary: var(--accent);
+  /* ── Brand Spec Core Tokens ── */
+  --bg: oklch(98.01% 0.0172 113.8);       /* pale sage mist app canvas */
+  --bg-alt: oklch(95.5% 0.015 113.8);      /* soft sage wash */
+  --surface: oklch(98.94% 0.0119 101.5);   /* warm ivory card */
+  --surface-2: oklch(99.6% 0.008 101.5);   /* elevated ivory */
+  --fg: oklch(19.54% 0.0182 137.9);        /* near-black pine ink */
+  --muted: oklch(49.83% 0.0184 154.1);     /* softened green-gray metadata */
+  --border: oklch(90.54% 0.0172 145.4);    /* quiet sage line */
+  --accent: oklch(76.19% 0.1405 98.4);     /* sun yellow — primary signal & highlights */
+  --primary: var(--fg);                    /* primary actions are dark pine capsules */
 
-  --accent-soft: rgba(238, 127, 101, 0.13);
-  --accent-deep: #D2593C;
-  --accent-ink: #B9503A;
-  /* readable coral text */
-  --warm: #FFFDFA;
-  --warm-soft: rgba(255, 253, 250, 0.5);
+  --accent-soft: rgba(220, 180, 40, 0.16);
+  --accent-deep: oklch(68% 0.15 98.4);
+  --accent-ink: var(--fg);
+  --warm: var(--surface);
+  --warm-soft: rgba(255, 253, 250, 0.6);
 
-  /* ── semantic states ── */
-  --gerund: #5FB99B;
-  /* mint — consensus / yes */
-  --nom: #E8705C;
-  /* coral-red — skip / no */
-  --warn: #E8A87C;
-  /* peach — split / caution */
-  --gerund-soft: rgba(95, 185, 155, 0.15);
-  --nom-soft: rgba(232, 112, 92, 0.13);
-  --warn-soft: rgba(232, 168, 124, 0.20);
+  /* ── semantic states (restrained swipe & status signals) ── */
+  --gerund: #3D8E74;                       /* quiet mint — consensus / yes */
+  --nom: #C85A48;                          /* softened brick — skip / no */
+  --warn: #D08A45;                         /* warm amber — split / caution */
+  --gerund-soft: rgba(61, 142, 116, 0.14);
+  --nom-soft: rgba(200, 90, 72, 0.12);
+  --warn-soft: rgba(208, 138, 69, 0.14);
 
-  /* ── pastel accent family ── */
-  --lilac: #C8B6E2;
-  --lilac-soft: rgba(200, 182, 226, 0.22);
-  --sky: #A8CFE8;
-  --sky-soft: rgba(168, 207, 232, 0.22);
-  --blush: #F4C4C0;
-  --peach: #FBD9BE;
+  /* ── quiet supporting accents ── */
+  --lilac: oklch(85% 0.03 300);
+  --lilac-soft: rgba(140, 120, 160, 0.10);
+  --sky: oklch(86% 0.03 230);
+  --sky-soft: rgba(100, 140, 170, 0.10);
+  --blush: oklch(88% 0.03 40);
+  --peach: oklch(88% 0.04 70);
 
-  /* ── gradients ── */
-  --grad-hero: linear-gradient(135deg, #FBD9BE 0%, #F6B9A8 45%, #E7B9DC 100%);
-  --grad-soft: linear-gradient(140deg, #FFF1E4 0%, #FDE4E0 55%, #F0E4F6 100%);
-  --grad-mint: linear-gradient(135deg, #DFF3EA 0%, #CDEAE0 100%);
+  /* ── gradients (natural ambient washes, no artificial neon) ── */
+  --grad-hero: linear-gradient(135deg, oklch(96.5% 0.018 113.8) 0%, oklch(94% 0.022 113.8) 100%);
+  --grad-soft: linear-gradient(140deg, var(--surface) 0%, oklch(97% 0.015 113.8) 100%);
+  --grad-mint: linear-gradient(135deg, rgba(61, 142, 116, 0.12) 0%, rgba(61, 142, 116, 0.04) 100%);
 
-  --nav-bg: #FFFDFA;
-  --nav-ink: #8C8078;
+  --nav-bg: var(--fg);
+  --nav-ink: var(--surface);
 
-  --r-card: 16px;
+  --r-card: 20px;
   --r-control: 12px;
   --r-pill: 9999px;
   --gap: 14px;
   --card-pad: 20px;
   --section-pad: 80px;
-  --shadow: 0 16px 38px -20px rgba(150, 112, 96, 0.30);
-  --shadow-lift: 0 26px 54px -26px rgba(150, 112, 96, 0.42);
+  --shadow: 0 8px 24px -12px rgba(25, 45, 30, 0.06);
+  --shadow-lift: 0 16px 36px -16px rgba(25, 45, 30, 0.15);
 
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
-  --ink: #1D2C1A;
+  --ink: var(--fg);
   --sb: 56px;
   --sidebar-width: 122px;
-  --shell: 1080px;
+  --shell: 430px;
   --sb3: 0;
 }
 
@@ -239,55 +228,57 @@ textarea {
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 .btn-primary {
   background: var(--fg);
   color: var(--surface);
   border-color: var(--fg);
-  box-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 20px -8px rgba(25, 45, 30, 0.35);
 }
 
 .btn-primary:hover {
-  background: color-mix(in srgb, var(--fg) 85%, white);
-  border-color: color-mix(in srgb, var(--fg) 85%, white);
-  box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, var(--fg) 88%, white);
+  border-color: color-mix(in srgb, var(--fg) 88%, white);
+  box-shadow: 0 12px 24px -8px rgba(25, 45, 30, 0.45);
 }
 
 .btn-coral {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 12px 26px -12px rgba(238, 127, 101, .7);
+  background: var(--fg);
+  color: var(--surface);
+  border-color: var(--fg);
+  box-shadow: 0 8px 20px -8px rgba(25, 45, 30, 0.35);
 }
 
 .btn-coral:hover {
-  background: var(--accent-deep);
-  border-color: var(--accent-deep);
+  background: color-mix(in srgb, var(--fg) 88%, white);
+  border-color: color-mix(in srgb, var(--fg) 88%, white);
 }
 
 .btn-secondary {
   background: var(--surface);
   color: var(--fg);
   border-color: var(--border);
+  box-shadow: 0 2px 8px -4px rgba(25, 45, 30, 0.05);
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent-ink);
-  background: var(--accent-soft);
+  border-color: var(--fg);
+  color: var(--fg);
+  background: var(--bg);
 }
 
 .btn-ghost {
   background: none;
   border-color: transparent;
   color: var(--fg);
-  padding: 10px 12px;
+  padding: 10px 14px;
 }
 
 .btn-ghost:hover {
-  color: var(--accent);
+  color: var(--fg);
+  background: var(--bg-alt);
 }
 
 .btn-block {
@@ -296,55 +287,55 @@ textarea {
 
 .btn-xs {
   min-height: 32px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: 12.5px;
-  border-radius: 11px;
+  border-radius: var(--r-pill);
 }
 
-/* ─── chips ── */
+/* ─── chips & pills (dense, capsule-like, tactile) ── */
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 30px;
-  padding: 5px 10px;
-  border-radius: 999px;
+  gap: 6px;
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
   border: 1px solid var(--border);
   background: var(--surface);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--muted);
   transition: all .14s ease;
 }
 
 .chip.sel {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-  color: var(--accent-ink);
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--surface);
   font-weight: 600;
 }
 
 .chip.tag-ok {
   background: var(--gerund-soft);
   border-color: transparent;
-  color: #3D8E74;
+  color: var(--gerund);
   font-weight: 600;
 }
 
 .chip.tag-split {
   background: var(--warn-soft);
   border-color: transparent;
-  color: #B9754A;
+  color: var(--warn);
   font-weight: 600;
 }
 
 .chip.tag-off {
-  background: var(--lilac-soft);
+  background: rgba(140, 120, 160, 0.1);
   border-color: transparent;
-  color: #7A6494;
+  color: var(--muted);
 }
 
-/* ─── card ── */
+/* ─── card (ivory, quiet border, soft shadow) ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -488,14 +479,14 @@ textarea {
 }
 
 .bento-card.accent {
-  background: var(--grad-hero);
-  border-color: transparent;
+  background: var(--surface);
+  border-color: var(--border);
   color: var(--fg);
 }
 
 .bento-card.pink {
-  background: var(--grad-soft);
-  border-color: transparent;
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .bento-card.warm {
@@ -504,8 +495,8 @@ textarea {
 }
 
 .bento-card.mint {
-  background: var(--grad-mint);
-  border-color: transparent;
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .bento-card.wide {

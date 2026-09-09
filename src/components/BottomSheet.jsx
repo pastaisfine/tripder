@@ -1,7 +1,18 @@
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 
 export default function BottomSheet({ open, onClose, children, className = "" }) {
+  const [hasTabBar, setHasTabBar] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setHasTabBar(Boolean(document.querySelector(".tabbar-mobile")));
+    }
+  }, [open]);
+
+  const navClass = hasTabBar ? " sheet--with-nav" : "";
+
   const content = (
     <AnimatePresence>
       {open && (
@@ -14,7 +25,7 @@ export default function BottomSheet({ open, onClose, children, className = "" })
             exit={{ opacity: 0 }}
           />
           <motion.div
-            className={`sheet open ${className}`}
+            className={`sheet open${navClass} ${className}`}
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
