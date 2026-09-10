@@ -177,9 +177,9 @@ export default function PlanScreen({ useAppState }) {
 
   const baseMode = activeItinerary.baseMode || (PLAN[activeItinerary.id] ? activeItinerary.id : mode);
   const plan = PLAN[baseMode] || PLAN.balanced;
-  const hotelPicked = HOTELS.find((h) => h.id === hotel);
-  const flightPicked = FLIGHTS.find((f) => f.id === flight);
-  const carPicked = CAR_RENTALS.find((c) => c.id === carRental);
+  const hotelPicked = typeof hotel === "object" && hotel ? hotel : HOTELS.find((h) => h.id === hotel);
+  const flightPicked = typeof flight === "object" && flight ? flight : FLIGHTS.find((f) => f.id === flight);
+  const carPicked = typeof carRental === "object" && carRental ? carRental : CAR_RENTALS.find((c) => c.id === carRental);
 
   const allItineraries = [
     ...MODES.map((id) => ({ id, label: MODE_LABELS[id], kind: "default" })),
@@ -406,7 +406,7 @@ export default function PlanScreen({ useAppState }) {
           <div className="tl-picks">
             <div className="tl-pick"><span className="lbl">Stay</span><span className="val">{hotelPicked ? `${hotelPicked.name} · ${hotelPicked.price}` : "none picked"}</span></div>
             <div className="tl-pick"><span className="lbl">Flight</span><span className="val">{flightPicked ? `${flightPicked.name} · ${flightPicked.price}` : "none picked"}</span></div>
-            <div className="tl-pick"><span className="lbl">Transport</span><span className="val">{carPicked ? `${carPicked.name} · ${carPicked.price}` : "none picked"}</span></div>
+            {carPicked && <div className="tl-pick"><span className="lbl">Transport</span><span className="val">{`${carPicked.name} · ${carPicked.price}`}</span></div>}
           </div>
           <button className="btn btn-primary btn-block" onClick={() => navigateAway("/travel")}>Set trip basics →</button>
         </div>

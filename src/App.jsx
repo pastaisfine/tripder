@@ -18,6 +18,7 @@ import SplashScreen from "./pages/SplashScreen";
 import StyleScreen from "./pages/StyleScreen";
 import SwipeScreen from "./pages/SwipeScreen";
 import TravelScreen from "./pages/TravelScreen";
+import TravelSearchScreen from "./pages/TravelSearchScreen";
 import TasksScreen from "./pages/TasksScreen";
 import { useAppState } from "./state/useAppState";
 import { fmtDateRange } from "./utils/date";
@@ -27,6 +28,7 @@ const CHROME = {
   "/setup": { header: true, invert: false, back: "/", backLabel: "Home", tabs: false },
   "/hub": { header: true, invert: true, tabs: true, active: "trip" },
   "/travel": { header: true, invert: false, back: "/plan", backLabel: "Plan", tabs: true, active: "trip" },
+  "/travel/search": { header: true, invert: false, back: "/travel", backLabel: "Travel", tabs: true, active: "trip" },
   "/swipe": { header: true, invert: false, back: "/setup", backLabel: "Setup", tabs: true, active: "swipe" },
   "/done": { header: true, invert: false, back: "/swipe", backLabel: "Swipe", tabs: false },
   "/style": { header: true, invert: false, back: "/done", backLabel: "Done", tabs: false },
@@ -56,6 +58,7 @@ function Shell() {
     "/setup": <SetupScreen useAppState={appState} />,
     "/hub": <HubScreen useAppState={appState} />,
     "/travel": <TravelScreen useAppState={appState} />,
+    "/travel/search": <TravelSearchScreen useAppState={appState} />,
     "/swipe": <SwipeScreen useAppState={appState} />,
     "/done": <DoneScreen useAppState={appState} />,
     "/style": <StyleScreen useAppState={appState} />,

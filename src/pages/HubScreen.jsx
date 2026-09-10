@@ -16,9 +16,9 @@ export default function HubScreen({ useAppState }) {
     hotel, flight, carRental, confirmedItineraryId
   } = useAppState;
 
-  const hotelPicked = HOTELS.find((h) => h.id === hotel);
-  const flightPicked = FLIGHTS.find((f) => f.id === flight);
-  const carPicked = CAR_RENTALS.find((c) => c.id === carRental);
+  const hotelPicked = typeof hotel === "object" && hotel ? hotel : HOTELS.find((h) => h.id === hotel);
+  const flightPicked = typeof flight === "object" && flight ? flight : FLIGHTS.find((f) => f.id === flight);
+  const carPicked = typeof carRental === "object" && carRental ? carRental : CAR_RENTALS.find((c) => c.id === carRental);
 
   const mineDone = likes + skips > 0;
   const doneCount = 3 + (mineDone ? 1 : 0);
