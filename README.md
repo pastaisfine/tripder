@@ -1,7 +1,10 @@
 # Tripder by The Nightbuddies
 **Team:** MAH CAI YING, CHONG ZI XUAN, DARREN TAN YIK WEI, JACKSON LIM KIAN KIN
+
 **Problem Statement:** Travel Planner
+
 **Video Presentation:** [Unlisted Youtube Link] 
+
 **Presentation Slides:** [Public Link] 
 
  # 1. Project Overview
@@ -10,6 +13,7 @@
 Group travel is challenging not because travellers lack choices, but because group members often have different preferences, budgets, interests, and travel paces. These differences make reaching a common decision difficult, while plans can also change due to budget constraints, weather, availability, or changes in group preferences.
 
 The main causes of the problem are:
+
 • **Preferences Clash** – Members may prefer different destinations, food, or travel speeds.
 • **Fragmented planning tools** – Existing applications generally separate itinerary planning, maps, and booking instead of helping groups make decisions collectively.
 • **Difficult group decision-making** – Groups commonly rely on messaging apps like WhatsApp, polls, or lengthy discussions to reach an agreement.
@@ -60,11 +64,14 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 
 # 2.2 Ideation Boards
 [Ideation Boards](https://www.figma.com/design/To0ChwYyRJA6o1Bq3ccGEk/Tripder-%E2%80%94-Ideation-Boards-2.2?node-id=0-1&t=k0cLVsFp4jWV8w9h-1)
+
 Mind Map
 ![Mindmap](./mindmap.png)
+
 Problem Tree
 ![Problem Tree](./ProblemTree.png)
-Crazy *s
+
+Crazy 8s
 ![Crazy 8s](./Crazy8s.png)
 Affinity Diagram
 ![Affinity Diagram](./AffinityDiagram.png)
