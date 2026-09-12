@@ -31,3 +31,5 @@ dist-ssr
 .opencode
 .claude
 .playwright-mcp
+
+skills-lock.json
