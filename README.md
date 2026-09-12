@@ -3,9 +3,9 @@
 
 **Problem Statement:** Travel Planner
 
-**Video Presentation:** [Unlisted Youtube Link] 
+**Video Presentation:** [Unlisted Youtube Link](https://youtu.be/-muNQTizyz4)
 
-**Presentation Slides:** [Public Link] 
+**Presentation Slides:** [Presentation Slides](https://docs.google.com/presentation/d/1d4Pib9JE5ELed85vmTG1bL4Pav7hRRRQ/edit?usp=drive_link&ouid=107507996618683076851&rtpof=true&sd=true)
 
  # 1. Project Overview
 **The Problem:**
@@ -96,7 +96,7 @@ Evidence:
 ![Mentor Session 4](./MentorSession4.png)
 
 # 3. Design & Prototype
-**UI Prototype:** [ Public Link ]
+**UI Prototype:** [UI Prototype](https://tripder.vercel.app/)
 
 **1. Crew Onboarding & Role Assignment**
 ![Crew Onboarding & Role Assignment](./KeyScreen1.png)
