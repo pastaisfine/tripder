@@ -66,9 +66,11 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 [Ideation Boards](https://www.figma.com/design/To0ChwYyRJA6o1Bq3ccGEk/Tripder-%E2%80%94-Ideation-Boards-2.2?node-id=0-1&t=k0cLVsFp4jWV8w9h-1)
 
 Mind Map
+
 ![Mindmap](./mindmap.png)
 
 Problem Tree
+
 ![Problem Tree](./ProblemTree.png)
 
 Crazy 8s
