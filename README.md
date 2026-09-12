@@ -60,11 +60,11 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 
 # 2.2 Ideation Boards
 [Ideation Boards](https://www.figma.com/design/To0ChwYyRJA6o1Bq3ccGEk/Tripder-%E2%80%94-Ideation-Boards-2.2?node-id=0-1&t=k0cLVsFp4jWV8w9h-1)
-![Mindmap](./mindmap.png)
-![Problem Tree](./ProblemTree.png)
-![Crazy 8s](./Crazy8s.png)
-![Affinity Diagram](./AffinityDiagram.png)
-![Ideas to MVP](./Ideas_to_MVP.png)
+![Mindmap](./images/mindmap.png)
+![Problem Tree](./images/ProblemTree.png)
+![Crazy 8s](./images/Crazy8s.png)
+![Affinity Diagram](./images/AffinityDiagram.png)
+![Ideas to MVP](./images/Ideas_to_MVP.png)
 
 # 2.3 Mentor Consultation
 | Date | Mentor | Feedback Received | What Was Changed |
@@ -76,40 +76,40 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 
 Evidence:
 
-![Mentor Session 1](./MentorSession1.png)
-![Mentor Session 2](./MentorSession2.png)
-![Mentor Session 3](./MentorSession3.png)
-![Mentor Session 4](./MentorSession4.png)
+![Mentor Session 1](./images/MentorSession1.png)
+![Mentor Session 2](./images/MentorSession2.png)
+![Mentor Session 3](./images/MentorSession3.png)
+![Mentor Session 4](./images/MentorSession4.png)
 
 # 3. Design & Prototype
 **UI Prototype:** [ Public Link ]
 
 **1. Crew Onboarding & Role Assignment**
-![Crew Onboarding & Role Assignment](./KeyScreen1.png)
+![Crew Onboarding & Role Assignment](./images/KeyScreen1.png)
 **Interaction:** Group leaders set up the trip and invite members through a shared link. The leader role can be passed to other members.
 
 **2. Granular Preference Capture**
-![Granular Preference Capture](./KeyScreen2.png)
+![Granular Preference Capture](./images/KeyScreen2.png)
 **Interaction:** Each member enters personal preferences and constraints, including interests, budget, dietary needs, and travel pace. This gives Tripder’s AI a complete picture of the group before generating a plan, helping surface potential conflicts early. 
 
 **3. Card Swipe**
-![Card Swipe](./KeyScreen3.png)
+![Card Swipe](./images/KeyScreen3.png)
 **Interaction:** Members swipe left or right on local spots and activities and provide a short reason for each choice. The AI combines both the choice and reasoning in real time to identify shared interests, explain disagreements, and find options that better fit the group. These preference insights can also be retained to improve recommendations for future trips.
 
 **4. Shared Plan Map Visualization: See the Whole Trip, Not Just a List**
-![Shared Plan Map Visualization: See the Whole Trip, Not Just a List](./KeyScreen4.png)
+![Shared Plan Map Visualization: See the Whole Trip, Not Just a List](./images/KeyScreen4.png)
 **Interaction:** Instead of viewing the itinerary as a long list of places, the group sees the entire daily route on a shared map, with destinations connected in geographic order. This lets members spot backtracking, unrealistic routes, and distant locations before agreeing on the plan.
 
 **5. AI Itinerary Styles & Customisation: One Trip, Multiple Ways to Travel**
-![AI Itinerary Styles & Customisation: One Trip, Multiple Ways to Travel](./KeyScreen5.png)
+![AI Itinerary Styles & Customisation: One Trip, Multiple Ways to Travel](./images/KeyScreen5.png)
 **Interaction:** Instead of forcing the group to agree on one plan immediately, Tripder generates different versions of the same trip — such as Balanced, Food-first, and Slower pace. Members can vote, rearrange activities, and adjust suggestions, making compromise easier without starting the itinerary from scratch.
 
 **6. Task Agent & Board**
-![Task Agent & Board](./KeyScreen6.png)
+![Task Agent & Board](./images/KeyScreen6.png)
 **Interaction:** When members type or speak natural-language messages (e.g., "We haven't booked the hotel yet"), the Task Agent instantly parses and converts them into trackable action items. The group can clearly see what needs to be done, who is in charge, and what's still pending—eliminating critical planning details buried in messy WhatsApp chats. Planning roles can then be assigned to different members, so responsibilities are shared from day one instead of falling on one person.
 
 **7. Search & filter stay,flight**
-![Search & filter stay,flight](./KeyScreen7.png)
+![Search & filter stay,flight](./images/KeyScreen7.png)
 **Interaction:** Instead of switching between multiple travel websites while planning, members can search, filter, and compare stays and flights directly within the itinerary workflow. Options can be narrowed by price, category and ratings, making it easier to turn the group’s decisions into a practical trip. 
 
 # 4. What Makes It Different
@@ -151,7 +151,7 @@ The **Gemini API key** used by Task Agent is securely stored as a Supabase Edge 
 This makes the Edge Function the main **security boundary** between the browser and sensitive third-party services.
 
 **System architecture diagram**
-![Architecture Diagram](./Architecture_diagram.png)
+![Architecture Diagram](./images/Architecture_diagram.png)
 
 
 **Build plan & scope:**
