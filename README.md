@@ -60,18 +60,23 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 
 # 2.2 Ideation Boards
 [Ideation Boards](https://www.figma.com/design/To0ChwYyRJA6o1Bq3ccGEk/Tripder-%E2%80%94-Ideation-Boards-2.2?node-id=0-1&t=k0cLVsFp4jWV8w9h-1)
+Mind Map
 ![Mindmap](./mindmap.png)
+Problem Tree
 ![Problem Tree](./ProblemTree.png)
+Crazy *s
 ![Crazy 8s](./Crazy8s.png)
+Affinity Diagram
 ![Affinity Diagram](./AffinityDiagram.png)
+Ideas to MVP
 ![Ideas to MVP](./Ideas_to_MVP.png)
 
 # 2.3 Mentor Consultation
 | Date | Mentor | Feedback Received | What Was Changed |
 | --- | --- | --- | --- | 
 | 31 August 2026 | Khor Jia Quan | Suggested improving the architecture diagram using a clearer visual paradigm and considering accessibility requirements for different user groups, including users with disabilities. | Refined the architecture diagram for better clarity and considered accessibility requirements during the UI/UX design process. |
-| 1 September 2026 | Teh Ming En | Recommended focusing on the AI replanning agent as the main “wow” feature, with a single disruption trigger such as weather. Also suggested improving the landing/group pages, completing the user flow, and maintaining a consistent colour palette. | Prioritised the AI replanning feature, narrowed the disruption scope, and improved the UI design and overall user flow. Budget tracking was kept as a supporting feature rather than the main selling point. |
-| 4 September 2026 | Lim Zi Yang | Suggested making the system more intelligent through LLM-powered recommendations instead of hard-coded locations, using real flight/stay information, focusing on a specific niche, and considering future monetisation such as points and advertisements. | Considered LLM-powered recommendations and real-world data sources, while refining the target scope and positioning. Some suggestions, such as a social-media-style travel forum and ride-hailing integration, were not prioritised due to time and MVP scope. |
+| 1 September 2026 | Teh Ming En | Recommended focusing on the AI replanning agent as the main “wow” feature, with a single disruption trigger such as weather. Also suggested improving the overall design pages, completing the user flow, and maintaining a consistent colour palette. | Prioritised the card swipe feature, narrowed the disruption scope, and improved the UI design and overall user flow. |
+| 4 September 2026 | Lim Zi Yang | Suggested using real world data resources instead of hard-coded locations, using real flight/stay information, focusing on a specific niche, and considering future monetisation such as points and advertisements. | Refine the target scope and positioning. Some suggestions, such as a social-media-style travel forum and ride-hailing integration, were not prioritised due to time and MVP scope. |
 | 10 September 2026 | Zach Khong | Giving advice on how to make the system even better, the focus should extend beyond simply addressing every point in the problem statement to prioritizing a premium user experience. Suggested on the swipe card feature could be made significantly more intelligent—if a user indicates a dislike for temples, all subsequent temple options would automatically be filtered out of during card swipe. | Prioritised refining user experience and interface flow to create a more polished product. Upgraded the swipe card feature with intelligent filtering logic to process user preferences. System now automatically removes disliked location categories from the card stack during interaction. |
 
 Evidence:
@@ -106,7 +111,7 @@ Evidence:
 
 **6. Task Agent & Board**
 ![Task Agent & Board](./KeyScreen6.png)
-**Interaction:** When members type or speak natural-language messages (e.g., "We haven't booked the hotel yet"), the Task Agent instantly parses and converts them into trackable action items. The group can clearly see what needs to be done, who is in charge, and what's still pending—eliminating critical planning details buried in messy WhatsApp chats. Planning roles can then be assigned to different members, so responsibilities are shared from day one instead of falling on one person.
+**Interaction:** When members type or speak natural-language messages containing single or multiple tasks (e.g., "We haven't booked the hotel yet"), the Task Agent instantly parses and converts them into trackable action items. The group can clearly see what needs to be done, who is in charge, and what's still pending—eliminating critical planning details buried in messy WhatsApp chats. Planning roles can then be assigned to different members, so responsibilities are shared from day one instead of falling on one person.
 
 **7. Search & filter stay,flight**
 ![Search & filter stay,flight](./KeyScreen7.png)
@@ -142,7 +147,8 @@ Tripder is designed as a **mobile-first single-page web application**. The MVP u
 | **Mapbox Directions API** | Route calculation | Generates walking routes between itinerary stops and returns route geometry that can be rendered directly on the map. | API usage is subject to the available Mapbox quota. |
 | **Vercel** | Frontend hosting | Both provide CDN-based static hosting, HTTPS and Git-based deployment suitable for a Vite application. | Free-tier bandwidth/build limits apply. |
 
-Security Consideration:
+**Security Consideration:**
+
 Tripder separates public client-side credentials from sensitive server-side credentials.
 The Supabase anon key and scoped Mapbox public token can be used by the browser. However, sensitive keys such as the **SerpApi key and Google Static Maps key are stored only as Supabase Edge Function secrets** and are never bundled into the frontend.
 
@@ -161,28 +167,37 @@ During the building phase, we will develop a focused MVP of Tripder centred on *
 We use Supabase as our backend platform to manage user authentication and store trip, group, preference, task, and itinerary data. We will also use **Supabase WebSocket** to synchronise group updates and itinerary voting in real time, while Supabase Edge Functions will securely connect our application to third-party APIs such as **SerpApi**, **AssemblyAI**, and **Gemini API**. 
 
 **1. Discovery Service**
+
 **Input:** Destination and search requirements
+
 **Function:**
 • Connect to **SerpApi** to fetch place information such as coordinates, images, Google ratings/reviews, and basic location details.
 • Provide structured place data to the itinerary and group-planning components. 
+
 **Note:** Discovery Service is an API service rather than an AI agent.
 
 **2. Itinerary Agent**
+
 **Input:** Destination, number of days, and available place data
+
 **Function:**
 • Generate activity/place cards for users to explore.
 • Generate a personalised itinerary based on an individual's preferences and travel constraints.
 • Organise AI suggested places into a practical daily schedule.
 
 **3. Preference Agent**
+
 **Input:** User profile, swipe preferences, and swipe reasons
+
 **Function:**
 • Analyse each user's likes, dislikes, and stated reasons about the place.
 • Identify individual preferences and constraints.
 • Generate a personal preference summary that can be used by the Group Planner Agent.
 
 **4. Group Planner Agent**
+
 **Input:** Individual preference summaries from all group members
+
 **Function:**
 • Compare group members' preferences.
 • Identify common interests, conflicts, priorities, and constraints.
@@ -190,7 +205,9 @@ We use Supabase as our backend platform to manage user authentication and store 
 • Generate a shared group itinerary that balances the group's needs.
 
 **5. Task Agent**
+
 **Input:** Natural-language text or voice requests from group members.
+
 **Function:**
 • Convert users' messages or voice input into actionable travel tasks.
 • Use **AssemblyAI** to convert voice input into text.
