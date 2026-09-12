@@ -5,7 +5,8 @@
 **Presentation Slides:** [Public Link] 
 
  # 1. Project Overview
-**The Problem**
+**The Problem:**
+
 Group travel is challenging not because travellers lack choices, but because group members often have different preferences, budgets, interests, and travel paces. These differences make reaching a common decision difficult, while plans can also change due to budget constraints, weather, availability, or changes in group preferences.
 
 The main causes of the problem are:
@@ -19,10 +20,12 @@ Several existing applications address parts of the travel-planning process. For 
 **Market gap** is:
 The market does not simply need another itinerary builder. It needs a solution that continuously translates conflicting group preferences and changing circumstances into one adaptive decision.
 
-**Our Solution**
+**Our Solution:**
+
 Tripder is an **AI-assisted multi-agent** group travel planner that helps travellers turn different individual preferences into one shared and practical itinerary through its **multi-agent** AI system—comprising the **Task Agent**, **Preference Agent**, **Group Planner Agent**, and **Itinerary Agent**—to resolve preference conflicts, support group decision-making, and continuously adapt travel plans to changing circumstances. Members can provide their interests, budget, dietary needs, and preferred travel pace, while Tripder analyses the group’s preferences to identify common ground and suggest suitable compromises. It then generates an itinerary that the group can review, customise, and confirm together. When circumstances change during the trip, Tripder can reassess the remaining schedule and suggest a revised plan instead of requiring travellers to manually rebuild their itinerary.
 
-**Feature Set**
+**Feature Set:**
+
 **1. Smart Group Preference & Decision-Making** — Members set their individual interests, budgets, dietary requirements, and travel preferences, then collaboratively swipe and vote on proposed activities (like or dislike) while AI analyses group preferences, identifies common interests and conflicts, and recommends suitable compromises. 
 **2. AI-Powered Itinerary Planning & Customisation** — Generate and compare multiple itinerary styles based on group preferences, time, budget, location, and travel constraints, then allow the group to customise and adjust activities before finalise the itinerary, and allow user to export finalised itinerary as a PDF for offline viewing.
 **3. Group Confirmation** — Allow members to review and agree on the proposed itinerary before finalising it.
@@ -72,6 +75,7 @@ During ideation, we explored several directions ranging from AI-assisted plannin
 | 10 September 2026 | Zach Khong | Giving advice on how to make the system even better, the focus should extend beyond simply addressing every point in the problem statement to prioritizing a premium user experience. Suggested on the swipe card feature could be made significantly more intelligent—if a user indicates a dislike for temples, all subsequent temple options would automatically be filtered out of during card swipe. | Prioritised refining user experience and interface flow to create a more polished product. Upgraded the swipe card feature with intelligent filtering logic to process user preferences. System now automatically removes disliked location categories from the card stack during interaction. |
 
 Evidence:
+
 ![Mentor Session 1](./MentorSession1.png)
 ![Mentor Session 2](./MentorSession2.png)
 ![Mentor Session 3](./MentorSession3.png)
@@ -79,6 +83,7 @@ Evidence:
 
 # 3. Design & Prototype
 **UI Prototype:** [ Public Link ]
+
 **1. Crew Onboarding & Role Assignment**
 ![Crew Onboarding & Role Assignment](./KeyScreen1.png)
 **Interaction:** Group leaders set up the trip and invite members through a shared link. The leader role can be passed to other members.
@@ -118,7 +123,8 @@ Tripder differentiates itself from conventional travel-planning applications by 
 | **Shared Group Workspace & Role Management** | A trip organiser can invite members through a shared link, with the inviter initially becoming the trip leader and the ability to transfer the leadership role to another member, providing clear responsibility for finalising group decisions. |
 
 # 5. Technical Architecture & Feasibility
-**Tech stack**
+**Tech stack:**
+
 Tripder is designed as a **mobile-first single-page web application**. The MVP uses a lightweight frontend architecture with Supabase for authentication and serverless functionality, while third-party APIs provide map, routing, and place-search capabilities.
 | Technology | Purpose | Why We Chose It | Expected Constraints |
 | --- | --- | --- | --- |
@@ -148,7 +154,8 @@ This makes the Edge Function the main **security boundary** between the browser 
 ![Architecture Diagram](./Architecture_diagram.png)
 
 
-**Build plan & scope**
+**Build plan & scope:**
+
 During the building phase, we will develop a focused MVP of Tripder centred on **multi-agent** AI-powered group preference analysis and itinerary generation. The system will use Supabase for backend communication and real-time websocket group synchronisation, while specialised AI agents handle different stages of the planning process. 
 
 We use Supabase as our backend platform to manage user authentication and store trip, group, preference, task, and itinerary data. We will also use **Supabase WebSocket** to synchronise group updates and itinerary voting in real time, while Supabase Edge Functions will securely connect our application to third-party APIs such as **SerpApi**, **AssemblyAI**, and **Gemini API**. 
